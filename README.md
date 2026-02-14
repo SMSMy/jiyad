@@ -4,9 +4,9 @@
 
 # Jiyad (جياد)
 
-### Simple, High-Speed Video/Audio Downloader for Android
+### A strictly simplified video downloader based on Seal, tailored for elderly users with large UI and one-click functionality.
 
-### تحميل فيديو وصوت سهل وسريع للأندرويد
+### محمل فيديو مبسط جداً مبني على Seal، مخصص لكبار السن بواجهة كبيرة ووظيفة النقر الواحدة
 
 <br>
 
