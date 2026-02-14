@@ -45,15 +45,15 @@
 ## 📱 Screenshots / لقطات الشاشة
 
 <div align="center">
-    <p><strong>Main Screen / الشاشة الرئيسية</strong></p>
-    <img src="fastlane/metadata/android/images/ScreenshotsAR1.jpg" width="45%" alt="Arabic Main">
-    <img src="fastlane/metadata/android/images/ScreenshotsEN1.jpg" width="45%" alt="English Main">
+    <h3>Main Screen / الشاشة الرئيسية</h3>
+    <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsAR1.jpg" width="45%" alt="Arabic Main">
+    <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsEN1.jpg" width="45%" alt="English Main">
     
     <br><br>
 
-    <p><strong>With Link / مع رابط</strong></p>
-    <img src="fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
-    <img src="fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
+    <h3>With Link / مع رابط</h3>
+    <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
+    <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
 
 </div>
 
