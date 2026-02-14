@@ -48,9 +48,17 @@
     <h3>Main Screen / الشاشة الرئيسية</h3>
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsAR1.jpg" width="45%" alt="Arabic Main">
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsEN1.jpg" width="45%" alt="English Main">
+<<<<<<< HEAD
     <br><br> <h3>With Link / عند وضع رابط</h3>
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
+=======
+    
+ <br>
+
+<img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
+<img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
+>>>>>>> 994528594a14a6dd45fb3b4e5af93ba9952967d7
 </div>
 
 <br>
