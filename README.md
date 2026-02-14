@@ -51,10 +51,9 @@
     
     <br><br>
 
-    <p><strong>With Link / مع رابط</strong></p>
-    <img src="fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
-    <img src="fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
-
+    <h3>With Link / مع رابط</h3>
+<img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
+<img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
 </div>
 
 ## ⬇️ Download / التحميل
