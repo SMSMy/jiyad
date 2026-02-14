@@ -48,18 +48,13 @@
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsAR1.jpg" width="45%" alt="Arabic Main">
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsEN1.jpg" width="45%" alt="English Main">
     
-    <br><br>
+ <br>
 
-    <h3>With Link / مع رابط</h3>
-<<<<<<< HEAD
-    <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
-    <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
-
-=======
 <img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
 <img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
->>>>>>> a0792cd57a2eea4da75372e4dac83fffb515c0c6
 </div>
+
+<br>
 
 ## ⬇️ Download / التحميل
 
