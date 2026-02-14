@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">جياد</string>
     <string name="extract_audio">حفظ كملف صوت</string>
     <string name="create_thumbnail">تنزيل الصورة المصغرة</string>
     <string name="download_settings_desc">عام، التنسيق، أمر مخصص</string>
@@ -451,4 +452,13 @@
     <string name="issue_tracker">متتبع المشكلة</string>
     <string name="issue_tracker_hint">هل واجهت خطًأ؟ قبل الإبلاغ عن مشكلة جديدة، يرجى البحث في أداة تتبع المشاكل لدينا. لقد عولجت العديد من المشاكل الشائعة وتوثيقها بالفعل هناك.</string>
     <string name="media_info">معلومات الوسائط</string>
+
+    <!-- جياد - نصوص مخصصة -->
+    <string name="jiyad_download_video">تحميل فيديو 🎬</string>
+    <string name="jiyad_download_audio">تحميل صوت 🎵</string>
+    <string name="jiyad_paste_url">الصق الرابط هنا</string>
+    <string name="jiyad_downloading">جاري التحميل...</string>
+    <string name="jiyad_download_success">تم التحميل بنجاح ✅</string>
+    <string name="jiyad_download_failed">فشل التحميل ❌</string>
+    <string name="jiyad_enter_url">ضع رابط الفيديو</string>
 </resources>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Seal</string>
+    <string name="app_name">Jiyad</string>
     <string name="video_directory">Video folder</string>
     <string name="extract_audio">Save as audio</string>
     <string name="create_thumbnail">Save thumbnail</string>
@@ -450,4 +450,13 @@
         <item quantity="one">%d audio</item>
         <item quantity="other">%d audios</item>
     </plurals>
+
+    <!-- Jiyad strings -->
+    <string name="jiyad_download_video">تحميل فيديو 🎬</string>
+    <string name="jiyad_download_audio">تحميل صوت 🎵</string>
+    <string name="jiyad_paste_url">ضع رابط الفيديو هنا</string>
+    <string name="jiyad_downloading">جاري التحميل...</string>
+    <string name="jiyad_download_success">تم التحميل بنجاح ✅</string>
+    <string name="jiyad_download_failed">فشل التحميل ❌</string>
+    <string name="jiyad_enter_url">ضع رابط الفيديو</string>
 </resources>

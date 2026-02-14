@@ -1,0 +1,627 @@
+jiyad/
+├── .git
+│   ├── HEAD
+│   ├── config
+│   ├── description
+│   ├── hooks
+│   │   ├── applypatch-msg.sample
+│   │   ├── commit-msg.sample
+│   │   ├── fsmonitor-watchman.sample
+│   │   ├── post-update.sample
+│   │   ├── pre-applypatch.sample
+│   │   ├── pre-commit.sample
+│   │   ├── pre-merge-commit.sample
+│   │   ├── pre-push.sample
+│   │   ├── pre-rebase.sample
+│   │   ├── pre-receive.sample
+│   │   ├── prepare-commit-msg.sample
+│   │   ├── push-to-checkout.sample
+│   │   ├── sendemail-validate.sample
+│   │   └── update.sample
+│   ├── index
+│   ├── info
+│   │   └── exclude
+│   ├── logs
+│   │   ├── HEAD
+│   │   └── refs
+│   │       ├── heads
+│   │       │   └── main
+│   │       └── remotes
+│   │           └── origin
+│   │               └── HEAD
+│   ├── objects
+│   │   ├── info
+│   │   └── pack
+│   │       ├── pack-8cc1da22f4a7aa3ff3f969218c76a92d9aecfc0d.idx
+│   │       ├── pack-8cc1da22f4a7aa3ff3f969218c76a92d9aecfc0d.pack
+│   │       └── pack-8cc1da22f4a7aa3ff3f969218c76a92d9aecfc0d.rev
+│   ├── packed-refs
+│   └── refs
+│       ├── heads
+│       │   └── main
+│       ├── remotes
+│       │   └── origin
+│       │       └── HEAD
+│       └── tags
+├── .github
+│   ├── FUNDING.yml
+│   ├── ISSUE_TEMPLATE
+│   │   ├── bug_report.yml
+│   │   ├── config.yml
+│   │   └── feature_request.yml
+│   └── workflows
+│       ├── Issue-Handler.yaml
+│       ├── android.yml
+│       ├── android_ci.yml
+│       ├── close-stale-issues.yml
+│       └── sponsor.yml
+├── .gitignore
+├── .idea
+│   ├── AndroidProjectSystem.xml
+│   ├── appInsightsSettings.xml
+│   ├── codeStyles
+│   │   ├── Project.xml
+│   │   └── codeStyleConfig.xml
+│   ├── compiler.xml
+│   ├── deploymentTargetSelector.xml
+│   ├── gradle.xml
+│   ├── icon.png
+│   ├── inspectionProfiles
+│   │   └── Project_Default.xml
+│   ├── kotlinc.xml
+│   ├── ktfmt.xml
+│   ├── migrations.xml
+│   ├── misc.xml
+│   ├── other.xml
+│   ├── runConfigurations.xml
+│   ├── studiobot.xml
+│   └── vcs.xml
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── app
+│   ├── .gitignore
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   ├── schemas
+│   │   └── com.junkfood.seal.database.AppDatabase
+│   │       ├── 1.json
+│   │       ├── 2.json
+│   │       ├── 3.json
+│   │       ├── 4.json
+│   │       └── 5.json
+│   └── src
+│       ├── androidTest
+│       │   └── java
+│       │       └── com
+│       │           └── junkfood
+│       │               └── seal
+│       │                   └── ExampleInstrumentedTest.kt
+│       ├── main
+│       │   ├── AndroidManifest.xml
+│       │   ├── java
+│       │   │   └── com
+│       │   │       └── junkfood
+│       │   │           └── seal
+│       │   │               ├── App.kt
+│       │   │               ├── CrashReportActivity.kt
+│       │   │               ├── DownloadService.kt
+│       │   │               ├── Downloader.kt
+│       │   │               ├── MainActivity.kt
+│       │   │               ├── NotificationActionReceiver.kt
+│       │   │               ├── QuickDownloadActivity.kt
+│       │   │               ├── database
+│       │   │               │   ├── AppDatabase.kt
+│       │   │               │   ├── VideoInfoDao.kt
+│       │   │               │   ├── backup
+│       │   │               │   │   ├── Backup.kt
+│       │   │               │   │   └── BackupUtil.kt
+│       │   │               │   └── objects
+│       │   │               │       ├── CommandTemplate.kt
+│       │   │               │       ├── CookieProfile.kt
+│       │   │               │       ├── DownloadedVideoInfo.kt
+│       │   │               │       └── OptionShortcut.kt
+│       │   │               ├── download
+│       │   │               │   ├── DownloaderV2.kt
+│       │   │               │   ├── Task.kt
+│       │   │               │   └── TaskFactory.kt
+│       │   │               ├── ui
+│       │   │               │   ├── common
+│       │   │               │   │   ├── AnimatedComposable.kt
+│       │   │               │   │   ├── AsyncImageImpl.kt
+│       │   │               │   │   ├── CompositionLocals.kt
+│       │   │               │   │   ├── Ext.kt
+│       │   │               │   │   ├── HapticFeedback.kt
+│       │   │               │   │   ├── Route.kt
+│       │   │               │   │   └── motion
+│       │   │               │   │       ├── AnimationSpecs.kt
+│       │   │               │   │       ├── MaterialSharedAxis.kt
+│       │   │               │   │       └── MotionConstants.kt
+│       │   │               │   ├── component
+│       │   │               │   │   ├── ActionSheetItems.kt
+│       │   │               │   │   ├── Buttons.kt
+│       │   │               │   │   ├── Chips.kt
+│       │   │               │   │   ├── CommonComponents.kt
+│       │   │               │   │   ├── DialogItems.kt
+│       │   │               │   │   ├── Dialogs.kt
+│       │   │               │   │   ├── DownloadQueueItem.kt
+│       │   │               │   │   ├── FormatItem.kt
+│       │   │               │   │   ├── IconButtons.kt
+│       │   │               │   │   ├── ModalBottomSheetM2.kt
+│       │   │               │   │   ├── ModalBottomSheetM3.kt
+│       │   │               │   │   ├── PreferenceItems.kt
+│       │   │               │   │   ├── SearchBar.kt
+│       │   │               │   │   ├── SegementedButton.kt
+│       │   │               │   │   ├── SelectionGroup.kt
+│       │   │               │   │   ├── SettingItem.kt
+│       │   │               │   │   ├── SponsorItem.kt
+│       │   │               │   │   ├── TextField.kt
+│       │   │               │   │   ├── VideoCard.kt
+│       │   │               │   │   └── VideoListItem.kt
+│       │   │               │   ├── page
+│       │   │               │   │   ├── AppEntry.kt
+│       │   │               │   │   ├── AppUpdater.kt
+│       │   │               │   │   ├── NavigationDrawer.kt
+│       │   │               │   │   ├── UpdateDialog.kt
+│       │   │               │   │   ├── WelcomeDialog.kt
+│       │   │               │   │   ├── YtdlpUpdater.kt
+│       │   │               │   │   ├── command
+│       │   │               │   │   │   ├── TaskListPage.kt
+│       │   │               │   │   │   └── TaskLogPage.kt
+│       │   │               │   │   ├── download
+│       │   │               │   │   │   ├── DownloadPage.kt
+│       │   │               │   │   │   ├── DownloadSettingsDialog.kt
+│       │   │               │   │   │   ├── HomePageViewModel.kt
+│       │   │               │   │   │   ├── MeteredNetworkDialog.kt
+│       │   │               │   │   │   ├── NotificationPermissionDialog.kt
+│       │   │               │   │   │   ├── PlaylistSelectionDialog.kt
+│       │   │               │   │   │   └── VideoSectionSlider.kt
+│       │   │               │   │   ├── downloadv2
+│       │   │               │   │   │   ├── ActionSheet.kt
+│       │   │               │   │   │   ├── DownloadPageV2.kt
+│       │   │               │   │   │   ├── TopBarNestedScrollConnection.kt
+│       │   │               │   │   │   ├── VideoCardV2.kt
+│       │   │               │   │   │   └── configure
+│       │   │               │   │   │       ├── DownloadDialogV2.kt
+│       │   │               │   │   │       ├── DownloadDialogViewModel.kt
+│       │   │               │   │   │       ├── FormatPage.kt
+│       │   │               │   │   │       ├── InputUrlDialog.kt
+│       │   │               │   │   │       └── PlaylistSelectionPage.kt
+│       │   │               │   │   ├── settings
+│       │   │               │   │   │   ├── BasePreferencePage.kt
+│       │   │               │   │   │   ├── SettingsPage.kt
+│       │   │               │   │   │   ├── about
+│       │   │               │   │   │   │   ├── AboutPage.kt
+│       │   │               │   │   │   │   ├── CreditsPage.kt
+│       │   │               │   │   │   │   ├── SponsorPage.kt
+│       │   │               │   │   │   │   └── UpdatePage.kt
+│       │   │               │   │   │   ├── appearance
+│       │   │               │   │   │   │   ├── AppearancePreferences.kt
+│       │   │               │   │   │   │   ├── DarkThemePreferences.kt
+│       │   │               │   │   │   │   └── LanguagesPage.kt
+│       │   │               │   │   │   ├── command
+│       │   │               │   │   │   │   ├── CommandTemplateDialog.kt
+│       │   │               │   │   │   │   ├── TemplateEditPage.kt
+│       │   │               │   │   │   │   └── TemplateListPage.kt
+│       │   │               │   │   │   ├── directory
+│       │   │               │   │   │   │   ├── DirectoryPreferenceDialog.kt
+│       │   │               │   │   │   │   └── DownloadDirectoryPreferences.kt
+│       │   │               │   │   │   ├── format
+│       │   │               │   │   │   │   ├── DownloadFormatPreferences.kt
+│       │   │               │   │   │   │   ├── FormatSettingDialogs.kt
+│       │   │               │   │   │   │   └── SubtitlePreference.kt
+│       │   │               │   │   │   ├── general
+│       │   │               │   │   │   │   ├── AdvancedSettingDialogs.kt
+│       │   │               │   │   │   │   ├── GeneralDownloadPreferences.kt
+│       │   │               │   │   │   │   └── YtdlpUpdateDialog.kt
+│       │   │               │   │   │   ├── interaction
+│       │   │               │   │   │   │   ├── InteractionPreferencePage.kt
+│       │   │               │   │   │   │   └── InterfaceCustomizationDialogs.kt
+│       │   │               │   │   │   ├── network
+│       │   │               │   │   │   │   ├── CookieProfilesPage.kt
+│       │   │               │   │   │   │   ├── CookiesViewModel.kt
+│       │   │               │   │   │   │   ├── NetworkPreferences.kt
+│       │   │               │   │   │   │   ├── NetworkSettingDialogs.kt
+│       │   │               │   │   │   │   └── WebViewPage.kt
+│       │   │               │   │   │   └── troubleshooting
+│       │   │               │   │   │       └── TroubleshootingPage.kt
+│       │   │               │   │   └── videolist
+│       │   │               │   │       ├── ExportImportDialog.kt
+│       │   │               │   │       ├── RemoveItemDialog.kt
+│       │   │               │   │       ├── VideoDetailDrawer.kt
+│       │   │               │   │       ├── VideoListPage.kt
+│       │   │               │   │       └── VideoListViewModel.kt
+│       │   │               │   ├── svg
+│       │   │               │   │   ├── VectorPreviews.kt
+│       │   │               │   │   ├── __DrawableVectors.kt
+│       │   │               │   │   └── drawablevectors
+│       │   │               │   │       ├── Coder.kt
+│       │   │               │   │       ├── Download.kt
+│       │   │               │   │       ├── VideoFiles.kt
+│       │   │               │   │       └── VideoSteaming.kt
+│       │   │               │   └── theme
+│       │   │               │       ├── ColorScheme.kt
+│       │   │               │       ├── Shape.kt
+│       │   │               │       ├── Theme.kt
+│       │   │               │       └── Type.kt
+│       │   │               └── util
+│       │   │                   ├── DatabaseUtil.kt
+│       │   │                   ├── DateTimeUtil.kt
+│       │   │                   ├── DownloadUtil.kt
+│       │   │                   ├── FileUtil.kt
+│       │   │                   ├── LanguageSettings.kt
+│       │   │                   ├── NotificationUtil.kt
+│       │   │                   ├── PreferenceUtil.kt
+│       │   │                   ├── SponsorData.kt
+│       │   │                   ├── SponsorUtil.kt
+│       │   │                   ├── TextUtil.kt
+│       │   │                   ├── UpdateUtil.kt
+│       │   │                   └── VideoInfo.kt
+│       │   └── res
+│       │       ├── drawable
+│       │       │   ├── ic_launcher_foreground.xml
+│       │       │   ├── ic_launcher_monochrome.xml
+│       │       │   ├── icons8_matrix.xml
+│       │       │   ├── icons8_telegram_app.xml
+│       │       │   ├── outline_cancel_24.xml
+│       │       │   ├── outline_content_copy_24.xml
+│       │       │   ├── sample.webp
+│       │       │   ├── sample1.webp
+│       │       │   ├── sample2.webp
+│       │       │   ├── sample3.webp
+│       │       │   └── seal.xml
+│       │       ├── drawable-anydpi-v24
+│       │       │   └── ic_stat_seal.xml
+│       │       ├── drawable-hdpi
+│       │       │   └── ic_stat_seal.png
+│       │       ├── drawable-mdpi
+│       │       │   └── ic_stat_seal.png
+│       │       ├── drawable-xhdpi
+│       │       │   └── ic_stat_seal.png
+│       │       ├── drawable-xxhdpi
+│       │       │   └── ic_stat_seal.png
+│       │       ├── mipmap-anydpi-v26
+│       │       │   ├── ic_launcher.xml
+│       │       │   └── ic_launcher_round.xml
+│       │       ├── mipmap-hdpi
+│       │       │   ├── ic_launcher.png
+│       │       │   ├── ic_launcher_foreground.png
+│       │       │   └── ic_launcher_round.png
+│       │       ├── mipmap-mdpi
+│       │       │   ├── ic_launcher.png
+│       │       │   ├── ic_launcher_foreground.png
+│       │       │   └── ic_launcher_round.png
+│       │       ├── mipmap-xhdpi
+│       │       │   ├── ic_launcher.png
+│       │       │   ├── ic_launcher_foreground.png
+│       │       │   └── ic_launcher_round.png
+│       │       ├── mipmap-xxhdpi
+│       │       │   ├── ic_launcher.png
+│       │       │   ├── ic_launcher_foreground.png
+│       │       │   └── ic_launcher_round.png
+│       │       ├── mipmap-xxxhdpi
+│       │       │   ├── ic_launcher.png
+│       │       │   ├── ic_launcher_foreground.png
+│       │       │   └── ic_launcher_round.png
+│       │       ├── resources.properties
+│       │       ├── values
+│       │       │   ├── ic_launcher_background.xml
+│       │       │   ├── strings.xml
+│       │       │   └── themes.xml
+│       │       ├── values-ar
+│       │       │   └── strings.xml
+│       │       ├── values-ar-rSA
+│       │       │   └── strings.xml
+│       │       ├── values-az
+│       │       │   └── strings.xml
+│       │       ├── values-be
+│       │       │   └── strings.xml
+│       │       ├── values-bn
+│       │       │   └── strings.xml
+│       │       ├── values-ca
+│       │       │   └── strings.xml
+│       │       ├── values-ckb
+│       │       │   └── strings.xml
+│       │       ├── values-cs
+│       │       │   └── strings.xml
+│       │       ├── values-da
+│       │       │   └── strings.xml
+│       │       ├── values-de
+│       │       │   └── strings.xml
+│       │       ├── values-el
+│       │       │   └── strings.xml
+│       │       ├── values-es
+│       │       │   └── strings.xml
+│       │       ├── values-eu
+│       │       │   └── strings.xml
+│       │       ├── values-fa
+│       │       │   └── strings.xml
+│       │       ├── values-fil
+│       │       │   └── strings.xml
+│       │       ├── values-fr
+│       │       │   └── strings.xml
+│       │       ├── values-gl
+│       │       │   └── strings.xml
+│       │       ├── values-hi
+│       │       │   └── strings.xml
+│       │       ├── values-hr
+│       │       │   └── strings.xml
+│       │       ├── values-hu
+│       │       │   └── strings.xml
+│       │       ├── values-in
+│       │       │   └── strings.xml
+│       │       ├── values-it
+│       │       │   └── strings.xml
+│       │       ├── values-iw
+│       │       │   └── strings.xml
+│       │       ├── values-ja
+│       │       │   └── strings.xml
+│       │       ├── values-ji
+│       │       │   └── strings.xml
+│       │       ├── values-kab
+│       │       │   └── strings.xml
+│       │       ├── values-km
+│       │       │   └── strings.xml
+│       │       ├── values-kmr
+│       │       │   └── strings.xml
+│       │       ├── values-kn
+│       │       │   └── strings.xml
+│       │       ├── values-ko
+│       │       │   └── strings.xml
+│       │       ├── values-lt
+│       │       │   └── strings.xml
+│       │       ├── values-lv
+│       │       │   └── strings.xml
+│       │       ├── values-ml
+│       │       │   └── strings.xml
+│       │       ├── values-mn
+│       │       │   └── strings.xml
+│       │       ├── values-mr
+│       │       │   └── strings.xml
+│       │       ├── values-ms
+│       │       │   └── strings.xml
+│       │       ├── values-nb
+│       │       │   └── strings.xml
+│       │       ├── values-nl
+│       │       │   └── strings.xml
+│       │       ├── values-nn
+│       │       │   └── strings.xml
+│       │       ├── values-or
+│       │       │   └── strings.xml
+│       │       ├── values-pa
+│       │       │   └── strings.xml
+│       │       ├── values-pl
+│       │       │   └── strings.xml
+│       │       ├── values-pt
+│       │       │   └── strings.xml
+│       │       ├── values-pt-rBR
+│       │       │   └── strings.xml
+│       │       ├── values-pt-rPT
+│       │       │   └── strings.xml
+│       │       ├── values-ro
+│       │       │   └── strings.xml
+│       │       ├── values-ru
+│       │       │   └── strings.xml
+│       │       ├── values-si
+│       │       │   └── strings.xml
+│       │       ├── values-sk
+│       │       │   └── strings.xml
+│       │       ├── values-sl
+│       │       │   └── strings.xml
+│       │       ├── values-sr
+│       │       │   └── strings.xml
+│       │       ├── values-sv
+│       │       │   └── strings.xml
+│       │       ├── values-ta
+│       │       │   └── strings.xml
+│       │       ├── values-th
+│       │       │   └── strings.xml
+│       │       ├── values-tr
+│       │       │   └── strings.xml
+│       │       ├── values-uk
+│       │       │   └── strings.xml
+│       │       ├── values-ur
+│       │       │   └── strings.xml
+│       │       ├── values-uz
+│       │       │   └── strings.xml
+│       │       ├── values-vi
+│       │       │   └── strings.xml
+│       │       ├── values-zh-rCN
+│       │       │   └── strings.xml
+│       │       ├── values-zh-rTW
+│       │       │   └── strings.xml
+│       │       └── xml
+│       │           └── provider_paths.xml
+│       └── test
+│           └── java
+│               └── com
+│                   └── junkfood
+│                       └── seal
+│                           └── ExampleUnitTest.kt
+├── build.gradle.kts
+├── buildSrc
+│   ├── .gitignore
+│   ├── build.gradle.kts
+│   └── src
+│       └── main
+│           └── kotlin
+│               └── Version.kt
+├── color
+│   ├── .gitignore
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── src
+│       └── main
+│           └── java
+│               ├── com
+│               │   └── kyant
+│               │       └── monet
+│               │           ├── ColorSpec.kt
+│               │           ├── Monet.kt
+│               │           ├── PaletteStyle.kt
+│               │           └── TonalPalettes.kt
+│               └── io
+│                   └── material
+│                       ├── hct
+│                       │   ├── Cam16.kt
+│                       │   ├── Hct.kt
+│                       │   ├── HctSolver.kt
+│                       │   └── ViewingConditions.kt
+│                       └── utils
+│                           ├── ColorUtils.kt
+│                           ├── MathUtils.kt
+│                           └── StringUtils.kt
+├── fastlane
+│   └── metadata
+│       └── android
+│           ├── ar-SA
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── bn
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── de-DE
+│           │   ├── changelogs
+│           │   │   ├── 10320.txt
+│           │   │   ├── 10330.txt
+│           │   │   ├── 10340.txt
+│           │   │   └── 10350.txt
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── en-US
+│           │   ├── changelogs
+│           │   │   ├── 10704.txt
+│           │   │   ├── 10714.txt
+│           │   │   ├── 10724.txt
+│           │   │   ├── 10734.txt
+│           │   │   ├── 10804.txt
+│           │   │   ├── 10814.txt
+│           │   │   └── 10824.txt
+│           │   ├── full_description.txt
+│           │   ├── images
+│           │   │   ├── icon.png
+│           │   │   └── phoneScreenshots
+│           │   │       ├── 1.jpg
+│           │   │       ├── 2.jpg
+│           │   │       ├── 3.jpg
+│           │   │       ├── 4.jpg
+│           │   │       ├── 5.jpg
+│           │   │       ├── 6.jpg
+│           │   │       ├── 7.jpg
+│           │   │       ├── 8.jpg
+│           │   │       └── 9.jpg
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── es
+│           │   ├── changelogs
+│           │   │   ├── 10320.txt
+│           │   │   ├── 10330.txt
+│           │   │   └── 10340.txt
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── fr-FR
+│           │   ├── changelogs
+│           │   │   └── 10350.txt
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── hi
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── hr
+│           │   ├── changelogs
+│           │   │   ├── 10330.txt
+│           │   │   └── 10340.txt
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── id
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── it
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── ja
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── ml
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── nb-NO
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── nl-NL
+│           │   ├── changelogs
+│           │   │   └── 10350.txt
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── pt-BR
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── ru
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── th
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── uk
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── vi
+│           │   ├── changelogs
+│           │   │   └── 10320.txt
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           ├── zh-CN
+│           │   ├── full_description.txt
+│           │   ├── short_description.txt
+│           │   └── title.txt
+│           └── zh-TW
+│               ├── changelogs
+│               │   └── 10330.txt
+│               ├── full_description.txt
+│               ├── short_description.txt
+│               └── title.txt
+├── generate_tree.py
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle.kts
+├── translations
+│   ├── README-ar.md
+│   ├── README-az.md
+│   ├── README-bn.md
+│   ├── README-fa.md
+│   ├── README-hi.md
+│   ├── README-id.md
+│   ├── README-it.md
+│   ├── README-ja.md
+│   ├── README-pt.md
+│   ├── README-ru.md
+│   ├── README-sr.md
+│   ├── README-th.md
+│   ├── README-ua.md
+│   ├── README-zh_Hans.md
+│   └── README-zh_Hant.md
+└── tree.txt
