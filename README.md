@@ -4,15 +4,14 @@
 
 # Jiyad (جياد)
 
-### Simple, High-Speed Video/Audio Downloader for Android
+### A strictly simplified video downloader based on Seal, tailored for elderly users with large UI and one-click functionality.
 
-### تحميل فيديو وصوت سهل وسريع للأندرويد
+### محمل فيديو مبسط جداً مبني على Seal، مخصص لكبار السن بواجهة كبيرة ووظيفة النقر الواحدة
 
 <br>
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/SMSMy/jiyad?color=black&label=Latest%20Release&logo=github)](https://github.com/SMSMy/jiyad/releases/latest/)
-[![GitHub all releases](https://img.shields.io/github/downloads/SMSMy/jiyad/total?label=Downloads&logo=github)](https://github.com/SMSMy/jiyad/releases/)
-
+[![GitHub all releases](https://img.shields.io/github/downloads-pre/SMSMy/jiyad/latest/total?sort=date&label=Downloads&color=blue&logo=github)](https://github.com/SMSMy/jiyad/releases)
 </div>
 
 <br>
@@ -52,9 +51,14 @@
     <br><br>
 
     <h3>With Link / مع رابط</h3>
+<<<<<<< HEAD
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
     <img src="https://raw.githubusercontent.com/SMSMy/jiyad/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
 
+=======
+<img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsAR2.jpg" width="45%" alt="Arabic With Link">
+<img src="https://github.com/SMSMy/jiyad/raw/main/fastlane/metadata/android/images/ScreenshotsEN2.jpg" width="45%" alt="English With Link">
+>>>>>>> a0792cd57a2eea4da75372e4dac83fffb515c0c6
 </div>
 
 ## ⬇️ Download / التحميل
