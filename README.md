@@ -11,8 +11,7 @@
 <br>
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/SMSMy/jiyad?color=black&label=Latest%20Release&logo=github)](https://github.com/SMSMy/jiyad/releases/latest/)
-[![GitHub all releases](https://img.shields.io/github/downloads/SMSMy/jiyad/total?label=Downloads&logo=github)](https://github.com/SMSMy/jiyad/releases/)
-
+[![GitHub all releases](https://img.shields.io/github/downloads-pre/SMSMy/jiyad/latest/total?sort=date&label=Downloads&color=blue&logo=github)](https://github.com/SMSMy/jiyad/releases)
 </div>
 
 <br>
