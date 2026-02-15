@@ -18,3 +18,4 @@ local.properties
 /keystore.properties
 .kotlin
 *.jks
+PROJECT_REPORT.md
