@@ -47,7 +47,7 @@ android {
         applicationId = "com.jiyad.downloader"
         minSdk = 24
         targetSdk = 35
-        versionCode = 200_000_150
+        versionCode = 201_000_400
         check(versionCode == currentVersionCode)
 
         versionName = baseVersionName
@@ -94,12 +94,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
+            isMinifyEnabled = false
+            isShrinkResources = false
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("githubPublish")
             }

@@ -3,22 +3,27 @@ package com.junkfood.seal.simple
 import android.content.Context
 import android.os.Environment
 import android.util.Log
+import com.junkfood.seal.database.objects.DownloadedVideoInfo
+import com.junkfood.seal.util.DatabaseUtil
+import com.junkfood.seal.util.NotificationUtil
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * محرك التحميل المبسط لجياد
- * يستخدم YoutubeDL مباشرة - بدون Koin, Room, أو WorkManager
+ * يستخدم YoutubeDL مباشرة مع إشعارات التقدم
  */
 object JiyadDownloader {
 
     private const val TAG = "JiyadDownloader"
+    private val notificationIdCounter = AtomicInteger(200)
 
     /**
-     * تحميل فيديو
+     * تحميل فيديو مع إشعار
      */
     suspend fun downloadVideo(
         context: Context,
@@ -26,6 +31,7 @@ object JiyadDownloader {
         onProgress: (Float, String) -> Unit,
         onComplete: (Result<String>) -> Unit
     ) {
+        val notifId = notificationIdCounter.getAndIncrement()
         withContext(Dispatchers.IO) {
             try {
                 val downloadPath = getDownloadPath()
@@ -43,20 +49,47 @@ object JiyadDownloader {
                 }
 
                 Log.d(TAG, "Starting video download: $url")
-                for (s in request.buildCommand()) Log.d(TAG, s)
 
+                // إشعار بدء التحميل
+                NotificationUtil.notifyProgress(
+                    title = "جاري التحميل...",
+                    notificationId = notifId,
+                    progress = 0,
+                    text = url.take(80)
+                )
+
+                var lastTitle = ""
                 YoutubeDL.getInstance().execute(
                     request = request,
                     processId = url,
                 ) { progress, _, text ->
                     onProgress(progress, text)
+                    if (text.isNotBlank()) lastTitle = text
+                    // تحديث الإشعار
+                    NotificationUtil.notifyProgress(
+                        title = "جاري التحميل...",
+                        notificationId = notifId,
+                        progress = progress.toInt().coerceIn(0, 100),
+                        text = text
+                    )
                 }
+
+                // إشعار اكتمال
+                NotificationUtil.finishNotification(
+                    notificationId = notifId,
+                    title = "تم التحميل ✅",
+                    text = lastTitle.ifBlank { "فيديو" }
+                )
+
+                // حفظ في قاعدة البيانات
+                saveToHistory(url, lastTitle.ifBlank { "Video" }, downloadPath)
 
                 withContext(Dispatchers.Main) {
                     onComplete(Result.success(downloadPath))
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Video download failed", e)
+                NotificationUtil.cancelNotification(notifId)
                 withContext(Dispatchers.Main) {
                     onComplete(Result.failure(e))
                 }
@@ -65,7 +98,7 @@ object JiyadDownloader {
     }
 
     /**
-     * تحميل صوت (MP3)
+     * تحميل صوت (MP3) مع إشعار
      */
     suspend fun downloadAudio(
         context: Context,
@@ -73,6 +106,7 @@ object JiyadDownloader {
         onProgress: (Float, String) -> Unit,
         onComplete: (Result<String>) -> Unit
     ) {
+        val notifId = notificationIdCounter.getAndIncrement()
         withContext(Dispatchers.IO) {
             try {
                 val downloadPath = getDownloadPath()
@@ -90,20 +124,59 @@ object JiyadDownloader {
                 }
 
                 Log.d(TAG, "Starting audio download: $url")
-                for (s in request.buildCommand()) Log.d(TAG, s)
 
+                // إشعار بدء التحميل
+                NotificationUtil.notifyProgress(
+                    title = "جاري التحميل...",
+                    notificationId = notifId,
+                    progress = 0,
+                    text = url.take(80)
+                )
+
+                var lastTitle = ""
+                var conversionStarted = false
                 YoutubeDL.getInstance().execute(
                     request = request,
                     processId = url,
                 ) { progress, _, text ->
-                    onProgress(progress, text)
+                    // عندما يصل التحميل إلى 100% ويبدأ التحويل
+                    if (progress >= 99f && !conversionStarted) {
+                        conversionStarted = true
+                        onProgress(99f, "🔄 جاري التحويل إلى MP3...")
+                        NotificationUtil.notifyProgress(
+                            title = "جاري التحويل إلى MP3...",
+                            notificationId = notifId,
+                            progress = -1, // indeterminate
+                            text = lastTitle.ifBlank { "تحويل الصوت" }
+                        )
+                    } else if (!conversionStarted) {
+                        onProgress(progress, text)
+                        NotificationUtil.notifyProgress(
+                            title = "جاري التحميل...",
+                            notificationId = notifId,
+                            progress = progress.toInt().coerceIn(0, 100),
+                            text = text
+                        )
+                    }
+                    if (text.isNotBlank()) lastTitle = text
                 }
+
+                // إشعار اكتمال
+                NotificationUtil.finishNotification(
+                    notificationId = notifId,
+                    title = "تم التحميل ✅",
+                    text = lastTitle.ifBlank { "صوت" }
+                )
+
+                // حفظ في قاعدة البيانات
+                saveToHistory(url, lastTitle.ifBlank { "Audio" }, downloadPath)
 
                 withContext(Dispatchers.Main) {
                     onComplete(Result.success(downloadPath))
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Audio download failed", e)
+                NotificationUtil.cancelNotification(notifId)
                 withContext(Dispatchers.Main) {
                     onComplete(Result.failure(e))
                 }
@@ -160,6 +233,27 @@ object JiyadDownloader {
         val thumbnail: String,
         val duration: Long
     )
+
+    /**
+     * حفظ التحميل في قاعدة البيانات
+     */
+    private fun saveToHistory(url: String, title: String, downloadPath: String) {
+        try {
+            DatabaseUtil.insertInfo(
+                DownloadedVideoInfo(
+                    id = 0,
+                    videoTitle = title,
+                    videoAuthor = "",
+                    videoUrl = url,
+                    thumbnailUrl = "",
+                    videoPath = downloadPath,
+                    extractor = "Jiyad"
+                )
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save download to history", e)
+        }
+    }
 
     /**
      * مسار التحميل: Downloads/جياد

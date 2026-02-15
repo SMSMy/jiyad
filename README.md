@@ -27,20 +27,18 @@
 
 - **Simple Interface:** Easy-to-use UI with large buttons and clear text.
   - **واجهة بسيطة:** تصميم سهل مع أزرار كبيرة ونصوص واضحة.
-- **Auto-Paste:** Automatically detects and pastes video links from clipboard.
-  - **لصق تلقائي:** يكتشف الروابط من الحافظة تلقائياً.
-
-- **High Speed:** Uses `aria2c` for maximum download speed.
-  - **سرعة عالية:** يستخدم `aria2c` لتحميل بأقصى سرعة.
-
+- **Quick Download:** Share a link to Jiyad and it starts downloading instantly.
+  - **تحميل سريع:** شارك رابطاً مع جياد ويبدأ التحميل فوراً.
+- **Auto-Thumbnail:** See the video title and thumbnail before downloading.
+  - **معاينة تلقائية:** شاهد عنوان الفيديو وصورته المصغرة قبل التحميل.
 - **Format Choice:** Easily choose between Video (MP4) or Audio (MP3).
   - **خيارات متعددة:** اختر بسهولة بين تحميل الفيديو (MP4) أو الصوت (MP3).
-
-- **Thumbnail Preview:** confirm the video before downloading.
-  - **معاينة:** شاهد صورة مصغرة وعنوان الفيديو قبل التحميل للتأكد.
-
-- **Auto Updates:** Checks for updates automatically from GitHub.
-  - **تحديثات تلقائية:** يتحقق من وجود إصدارات جديدة تلقائياً.
+- **Download History:** View and manage your past downloads.
+  - **سجل التحميلات:** عرض وإدارة تحميلاتك السابقة.
+- **Advanced Mode:** Access Seal's full download interface for power users.
+  - **الوضع المتقدم:** الوصول إلى واجهة Seal الكاملة للمستخدمين المحترفين.
+- **Auto Updates:** Checks for app and engine updates automatically.
+  - **تحديثات تلقائية:** يتحقق من وجود تحديثات للتطبيق والمحرك تلقائياً.
 
 ## 📱 Screenshots / لقطات الشاشة
 
@@ -62,8 +60,8 @@ Download the latest APK from the **Releases** page:
 
 [**Download Latest Release / تحميل آخر إصدار**](https://github.com/SMSMy/jiyad/releases/latest)
 
-> **Note:** For most devices, use the `universal` APK or `arm64-v8a`.
-> **ملاحظة:** لمعظم الأجهزة، استخدم نسخة `universal` أو `arm64-v8a`.
+> **Note:** Use the `arm64-v8a` APK for most modern devices.
+> **ملاحظة:** استخدم نسخة `arm64-v8a` لمعظم الأجهزة الحديثة.
 
 ## 🙏 Credits / الحقوق
 
@@ -72,14 +70,12 @@ Jiyad is built on top of excellent open-source projects:
 - **[Seal](https://github.com/JunkFood02/Seal)** by [JunkFood02](https://github.com/JunkFood02) - The foundation of this project
 - **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** - Powerful download engine
 - **[youtubedl-android](https://github.com/yausername/youtubedl-android)** - Android wrapper for yt-dlp
-- **[aria2](https://aria2.github.io/)** - High-speed download manager
 
 جياد مبني على مشاريع مفتوحة المصدر رائعة:
 
 - **[Seal](https://github.com/JunkFood02/Seal)** من [JunkFood02](https://github.com/JunkFood02) - الأساس لهذا المشروع
 - **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** - محرك التحميل القوي
 - **[youtubedl-android](https://github.com/yausername/youtubedl-android)** - غلاف أندرويد لـ yt-dlp
-- **[aria2](https://aria2.github.io/)** - مدير التحميل عالي السرعة
 
 ## 💬 Support / الدعم
 

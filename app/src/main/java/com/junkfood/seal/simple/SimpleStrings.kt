@@ -35,7 +35,24 @@ object SimpleStrings {
         "update_available" to "تحديث جديد متوفر! 🎉",
         "new_version" to "الإصدار الجديد:",
         "update_now" to "تحديث الآن",
-        "later" to "لاحقاً"
+        "later" to "لاحقاً",
+        // نصوص جديدة
+        "download_history" to "التحميلات",
+        "no_downloads" to "لا يوجد تحميلات بعد",
+        "delete" to "حذف",
+        "open_folder" to "فتح المجلد",
+        "back" to "رجوع",
+        "more_options" to "المزيد",
+        "ytdlp_update" to "تحديث محرك التحميل",
+        "ytdlp_updating" to "⏳ جاري التحديث...",
+        "ytdlp_updated" to "✅ تم التحديث بنجاح!",
+        "ytdlp_update_failed" to "❌ فشل التحديث",
+        "ytdlp_already_latest" to "✅ لديك آخر إصدار",
+        "advanced_mode" to "الوضع المتقدم ⚙️",
+        "update_engine" to "تحديث المحرك 🔄",
+        "close" to "إغلاق",
+        "converting" to "جاري التحويل...",
+        "clear" to "مسح"
     )
 
     // النصوص الانجليزية
@@ -55,7 +72,24 @@ object SimpleStrings {
         "update_available" to "New Update Available! 🎉",
         "new_version" to "New version:",
         "update_now" to "Update Now",
-        "later" to "Later"
+        "later" to "Later",
+        // New strings
+        "download_history" to "Downloads",
+        "no_downloads" to "No downloads yet",
+        "delete" to "Delete",
+        "open_folder" to "Open folder",
+        "back" to "Back",
+        "more_options" to "More",
+        "ytdlp_update" to "Update download engine",
+        "ytdlp_updating" to "⏳ Updating...",
+        "ytdlp_updated" to "✅ Updated successfully!",
+        "ytdlp_update_failed" to "❌ Update failed",
+        "ytdlp_already_latest" to "✅ Already up to date",
+        "advanced_mode" to "Advanced Mode ⚙️",
+        "update_engine" to "Update Engine 🔄",
+        "close" to "Close",
+        "converting" to "Converting...",
+        "clear" to "Clear"
     )
 
     /**

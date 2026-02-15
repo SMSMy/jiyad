@@ -45,12 +45,12 @@
             android:label="CrashReportActivity"
             android:theme="@style/Theme.Seal" />
         <activity
-            android:name=".QuickDownloadActivity"
+            android:name=".simple.SimpleQuickDownloadActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:label="@string/title_activity_share"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.Seal.Dialog">
+            android:theme="@style/Theme.Seal">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -76,6 +76,17 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse" />
+
+        <service
+            android:name=".simple.SimpleDownloadService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+
+        <activity
+            android:name=".QuickDownloadActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Seal.Dialog" />
 
         <activity
             android:name=".MainActivity"
