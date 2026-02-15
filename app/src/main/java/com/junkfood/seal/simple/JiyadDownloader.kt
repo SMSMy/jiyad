@@ -51,21 +51,32 @@ object JiyadDownloader {
 
                 Log.d(TAG, "Starting video download: $url")
 
+                // جلب عنوان الفيديو مسبقاً
+                var videoTitle = ""
+                try {
+                    val info = fetchVideoInfo(url)
+                    videoTitle = info?.title ?: ""
+                } catch (_: Exception) {}
+
                 // إشعار بدء التحميل
                 NotificationUtil.notifyProgress(
                     title = "جاري التحميل...",
                     notificationId = notifId,
                     progress = 0,
-                    text = url.take(80)
+                    text = videoTitle.ifBlank { url.take(80) }
                 )
 
-                var lastTitle = ""
                 YoutubeDL.getInstance().execute(
                     request = request,
                     processId = url,
                 ) { progress, _, text ->
+                    // التقاط العنوان من yt-dlp إذا لم نحصل عليه مسبقاً
+                    if (videoTitle.isBlank() && text.isNotBlank()
+                        && !text.startsWith("[") && !text.contains("%")
+                    ) {
+                        videoTitle = text
+                    }
                     onProgress(progress, text)
-                    if (text.isNotBlank()) lastTitle = text
                     // تحديث الإشعار
                     NotificationUtil.notifyProgress(
                         title = "جاري التحميل...",
@@ -79,11 +90,11 @@ object JiyadDownloader {
                 NotificationUtil.finishNotification(
                     notificationId = notifId,
                     title = "تم التحميل ✅",
-                    text = lastTitle.ifBlank { "فيديو" }
+                    text = videoTitle.ifBlank { "فيديو" }
                 )
 
                 // حفظ في قاعدة البيانات
-                saveToHistory(url, lastTitle.ifBlank { "Video" }, downloadPath)
+                saveToHistory(url, videoTitle.ifBlank { "Video" }, downloadPath)
 
                 // تحديث MediaStore ليظهر في الاستديو فوراً
                 scanDownloadedFiles(context, downloadPath)
@@ -129,20 +140,32 @@ object JiyadDownloader {
 
                 Log.d(TAG, "Starting audio download: $url")
 
+                // جلب عنوان الفيديو مسبقاً
+                var audioTitle = ""
+                try {
+                    val info = fetchVideoInfo(url)
+                    audioTitle = info?.title ?: ""
+                } catch (_: Exception) {}
+
                 // إشعار بدء التحميل
                 NotificationUtil.notifyProgress(
                     title = "جاري التحميل...",
                     notificationId = notifId,
                     progress = 0,
-                    text = url.take(80)
+                    text = audioTitle.ifBlank { url.take(80) }
                 )
 
-                var lastTitle = ""
                 var conversionStarted = false
                 YoutubeDL.getInstance().execute(
                     request = request,
                     processId = url,
                 ) { progress, _, text ->
+                    // التقاط العنوان من yt-dlp إذا لم نحصل عليه مسبقاً
+                    if (audioTitle.isBlank() && text.isNotBlank()
+                        && !text.startsWith("[") && !text.contains("%")
+                    ) {
+                        audioTitle = text
+                    }
                     // عندما يصل التحميل إلى 100% ويبدأ التحويل
                     if (progress >= 99f && !conversionStarted) {
                         conversionStarted = true
@@ -150,8 +173,8 @@ object JiyadDownloader {
                         NotificationUtil.notifyProgress(
                             title = "جاري التحويل إلى MP3...",
                             notificationId = notifId,
-                            progress = -1, // indeterminate
-                            text = lastTitle.ifBlank { "تحويل الصوت" }
+                            progress = -1,
+                            text = audioTitle.ifBlank { "تحويل الصوت" }
                         )
                     } else if (!conversionStarted) {
                         onProgress(progress, text)
@@ -162,18 +185,17 @@ object JiyadDownloader {
                             text = text
                         )
                     }
-                    if (text.isNotBlank()) lastTitle = text
                 }
 
                 // إشعار اكتمال
                 NotificationUtil.finishNotification(
                     notificationId = notifId,
                     title = "تم التحميل ✅",
-                    text = lastTitle.ifBlank { "صوت" }
+                    text = audioTitle.ifBlank { "صوت" }
                 )
 
                 // حفظ في قاعدة البيانات
-                saveToHistory(url, lastTitle.ifBlank { "Audio" }, downloadPath)
+                saveToHistory(url, audioTitle.ifBlank { "Audio" }, downloadPath)
 
                 // تحديث MediaStore ليظهر في الاستديو فوراً
                 scanDownloadedFiles(context, downloadPath)

@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -183,6 +184,7 @@ fun SimpleHomeScreen(initialUrl: String = "") {
     // التنقل بين الشاشات
     when (currentScreen) {
         "history" -> {
+            BackHandler { currentScreen = "home" }
             DownloadHistoryScreen(
                 lang = lang,
                 onNavigateBack = { currentScreen = "home" }
