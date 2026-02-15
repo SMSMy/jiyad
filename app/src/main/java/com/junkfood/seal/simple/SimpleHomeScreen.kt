@@ -464,30 +464,12 @@ fun SimpleHomeScreen(initialUrl: String = "") {
         )
     }
 
-    // نافذة تحديث التطبيق
+    // نافذة تحديث التطبيق (تحميل + تثبيت داخل التطبيق)
     if (showUpdateDialog && updateInfo != null) {
-        AlertDialog(
-            onDismissRequest = { showUpdateDialog = false },
-            title = { Text(s("update_available"), fontSize = 20.sp) },
-            text = {
-                Text(
-                    "${s("new_version")} ${updateInfo!!.latestVersion}",
-                    fontSize = 16.sp
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    SimpleAppUpdater.openDownloadLink(context, updateInfo!!.downloadUrl)
-                    showUpdateDialog = false
-                }) {
-                    Text(s("update_now"), fontSize = 16.sp)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showUpdateDialog = false }) {
-                    Text(s("later"), fontSize = 16.sp)
-                }
-            }
+        InAppUpdateDialog(
+            lang = lang,
+            updateInfo = updateInfo!!,
+            onDismiss = { showUpdateDialog = false }
         )
     }
 }
@@ -538,6 +520,127 @@ private fun YtDlpUpdateDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(s("close"), fontSize = 16.sp)
+            }
+        }
+    )
+}
+
+/**
+ * نافذة تحديث التطبيق داخل التطبيق (تحميل + تثبيت)
+ */
+@Composable
+private fun InAppUpdateDialog(
+    lang: SimpleStrings.Language,
+    updateInfo: SimpleAppUpdater.UpdateInfo,
+    onDismiss: () -> Unit
+) {
+    fun s(key: String) = SimpleStrings.get(key, lang)
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var downloadProgress by remember { mutableIntStateOf(0) }
+    var isDownloadingUpdate by remember { mutableStateOf(false) }
+    var downloadedApk by remember { mutableStateOf<java.io.File?>(null) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = { if (!isDownloadingUpdate) onDismiss() },
+        title = { Text(s("update_available"), fontSize = 20.sp) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (errorMessage.isNotBlank()) {
+                    // حالة الخطأ
+                    Text("❌ $errorMessage", fontSize = 16.sp)
+                } else if (downloadedApk != null) {
+                    // التحميل اكتمل - جاهز للتثبيت
+                    Text("✅ ${s("update_ready")}", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(s("update_tap_install"), fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else if (isDownloadingUpdate) {
+                    // جاري تحميل التحديث
+                    Text("${s("update_downloading")} $downloadProgress%", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LinearProgressIndicator(
+                        progress = { downloadProgress / 100f },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                    )
+                } else {
+                    // عرض معلومات التحديث
+                    Text(
+                        "${s("new_version")} ${updateInfo.latestVersion}",
+                        fontSize = 18.sp
+                    )
+                    if (updateInfo.releaseNotes.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            updateInfo.releaseNotes.take(200),
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 5,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            when {
+                downloadedApk != null -> {
+                    // زر التثبيت
+                    TextButton(onClick = {
+                        if (SimpleAppUpdater.canInstallApks(context)) {
+                            SimpleAppUpdater.installApk(context, downloadedApk!!)
+                        } else {
+                            SimpleAppUpdater.requestInstallPermission(context)
+                        }
+                    }) {
+                        Text(s("install_update"), fontSize = 16.sp)
+                    }
+                }
+                errorMessage.isNotBlank() -> {
+                    // إعادة المحاولة
+                    TextButton(onClick = {
+                        errorMessage = ""
+                    }) {
+                        Text(s("retry"), fontSize = 16.sp)
+                    }
+                }
+                !isDownloadingUpdate -> {
+                    // زر بدء التحديث
+                    TextButton(onClick = {
+                        isDownloadingUpdate = true
+                        downloadProgress = 0
+                        scope.launch {
+                            val apk = SimpleAppUpdater.downloadApk(
+                                context = context,
+                                downloadUrl = updateInfo.downloadUrl,
+                                onProgress = { downloadProgress = it }
+                            )
+                            isDownloadingUpdate = false
+                            if (apk != null) {
+                                downloadedApk = apk
+                            } else {
+                                errorMessage = s("update_download_failed")
+                            }
+                        }
+                    }) {
+                        Text(s("update_now"), fontSize = 16.sp)
+                    }
+                }
+            }
+        },
+        dismissButton = {
+            if (!isDownloadingUpdate) {
+                TextButton(onClick = onDismiss) {
+                    Text(s("later"), fontSize = 16.sp)
+                }
             }
         }
     )

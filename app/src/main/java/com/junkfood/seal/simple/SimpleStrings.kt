@@ -52,7 +52,13 @@ object SimpleStrings {
         "update_engine" to "تحديث المحرك 🔄",
         "close" to "إغلاق",
         "converting" to "جاري التحويل...",
-        "clear" to "مسح"
+        "clear" to "مسح",
+        "update_ready" to "التحديث جاهز للتثبيت",
+        "update_tap_install" to "اضغط تثبيت للمتابعة",
+        "update_downloading" to "جاري تحميل التحديث...",
+        "update_download_failed" to "فشل تحميل التحديث",
+        "install_update" to "تثبيت",
+        "retry" to "إعادة المحاولة"
     )
 
     // النصوص الانجليزية
@@ -89,7 +95,13 @@ object SimpleStrings {
         "update_engine" to "Update Engine 🔄",
         "close" to "Close",
         "converting" to "Converting...",
-        "clear" to "Clear"
+        "clear" to "Clear",
+        "update_ready" to "Update ready to install",
+        "update_tap_install" to "Tap Install to continue",
+        "update_downloading" to "Downloading update...",
+        "update_download_failed" to "Update download failed",
+        "install_update" to "Install",
+        "retry" to "Retry"
     )
 
     /**
