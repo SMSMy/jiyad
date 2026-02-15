@@ -47,7 +47,7 @@ android {
         applicationId = "com.jiyad.downloader"
         minSdk = 24
         targetSdk = 35
-        versionCode = 201_010_400
+        versionCode = 201_020_400
         check(versionCode == currentVersionCode)
 
         versionName = baseVersionName

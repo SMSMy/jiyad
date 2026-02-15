@@ -10,6 +10,7 @@ import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.media.MediaScannerConnection
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -83,6 +84,9 @@ object JiyadDownloader {
 
                 // حفظ في قاعدة البيانات
                 saveToHistory(url, lastTitle.ifBlank { "Video" }, downloadPath)
+
+                // تحديث MediaStore ليظهر في الاستديو فوراً
+                scanDownloadedFiles(context, downloadPath)
 
                 withContext(Dispatchers.Main) {
                     onComplete(Result.success(downloadPath))
@@ -170,6 +174,9 @@ object JiyadDownloader {
 
                 // حفظ في قاعدة البيانات
                 saveToHistory(url, lastTitle.ifBlank { "Audio" }, downloadPath)
+
+                // تحديث MediaStore ليظهر في الاستديو فوراً
+                scanDownloadedFiles(context, downloadPath)
 
                 withContext(Dispatchers.Main) {
                     onComplete(Result.success(downloadPath))
@@ -267,5 +274,30 @@ object JiyadDownloader {
             jiyadDir.mkdirs()
         }
         return jiyadDir.absolutePath
+    }
+
+    /**
+     * فحص الملفات المحملة لتحديث MediaStore (الظهور في الاستديو فوراً)
+     */
+    private fun scanDownloadedFiles(context: Context, directoryPath: String) {
+        try {
+            val dir = File(directoryPath)
+            if (!dir.exists()) return
+
+            val files = dir.listFiles() ?: return
+            val filePaths = files.map { it.absolutePath }.toTypedArray()
+
+            if (filePaths.isNotEmpty()) {
+                MediaScannerConnection.scanFile(
+                    context,
+                    filePaths,
+                    null
+                ) { path, uri ->
+                    Log.d(TAG, "Media scanned: $path -> $uri")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Media scan failed", e)
+        }
     }
 }
