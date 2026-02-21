@@ -25,4 +25,12 @@ object SimpleConfig {
 
     // استخراج الصوت كـ MP3 (الأكثر توافقاً مع السيارات والهواتف القديمة)
     const val AUDIO_EXTRACT_FORMAT = "mp3"
+
+    // فلتر FFmpeg لعزل الصوت البشري وتقليل الموسيقى الخلفية
+    // highpass=f=200  : إزالة bass والدرامز تحت 200Hz
+    // lowpass=f=3500  : إبقاء ترددات الصوت البشري فقط
+    // equalizer=...   : تعزيز نطاق الصوت البشري
+    // dynaudnorm      : تطبيع مستوى الصوت
+    const val VOICE_ISOLATION_FILTER =
+        "highpass=f=200,lowpass=f=3500,equalizer=f=1000:t=q:w=1:g=5,dynaudnorm"
 }

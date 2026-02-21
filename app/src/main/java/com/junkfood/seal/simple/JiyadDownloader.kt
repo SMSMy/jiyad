@@ -214,6 +214,110 @@ object JiyadDownloader {
     }
 
     /**
+     * تحميل صوت (MP3) مع تقليل الموسيقى الخلفية عبر فلاتر FFmpeg
+     * يستخدم --postprocessor-args لتطبيق VOICE_ISOLATION_FILTER بعد التحويل
+     */
+    suspend fun downloadAudioNoMusic(
+        context: Context,
+        url: String,
+        onProgress: (Float, String) -> Unit,
+        onComplete: (Result<String>) -> Unit
+    ) {
+        val notifId = notificationIdCounter.getAndIncrement()
+        withContext(Dispatchers.IO) {
+            try {
+                val downloadPath = getDownloadPath()
+                val request = YoutubeDLRequest(url).apply {
+                    addOption("--no-mtime")
+                    addOption("-f", SimpleConfig.AUDIO_FORMAT)
+                    addOption("-x")
+                    addOption("--audio-format", SimpleConfig.AUDIO_EXTRACT_FORMAT)
+                    // فلاتر FFmpeg لعزل الصوت البشري وتقليل الموسيقى الخلفية
+                    addOption("--postprocessor-args", "ffmpeg:-af ${SimpleConfig.VOICE_ISOLATION_FILTER}")
+                    addOption("-P", downloadPath)
+                    addOption("--no-playlist")
+                    if (SimpleConfig.USE_ARIA2C) {
+                        addOption("--downloader", "libaria2c.so")
+                    }
+                    addOption("-o", "%(title).100s.%(ext)s")
+                }
+
+                Log.d(TAG, "Starting audio-no-music download: $url")
+
+                // جلب عنوان الفيديو مسبقاً
+                var audioTitle = ""
+                try {
+                    val info = fetchVideoInfo(url)
+                    audioTitle = info?.title ?: ""
+                } catch (_: Exception) {}
+
+                // إشعار بدء التحميل
+                NotificationUtil.notifyProgress(
+                    title = "جاري التحميل...",
+                    notificationId = notifId,
+                    progress = 0,
+                    text = audioTitle.ifBlank { url.take(80) }
+                )
+
+                var processingStarted = false
+                YoutubeDL.getInstance().execute(
+                    request = request,
+                    processId = url,
+                ) { progress, _, text ->
+                    // التقاط العنوان من yt-dlp إذا لم نحصل عليه مسبقاً
+                    if (audioTitle.isBlank() && text.isNotBlank()
+                        && !text.startsWith("[") && !text.contains("%")
+                    ) {
+                        audioTitle = text
+                    }
+                    // عندما يصل التحميل إلى 100% ويبدأ معالجة FFmpeg
+                    if (progress >= 99f && !processingStarted) {
+                        processingStarted = true
+                        onProgress(99f, "🔇 جاري إزالة الموسيقى...")
+                        NotificationUtil.notifyProgress(
+                            title = "جاري إزالة الموسيقى...",
+                            notificationId = notifId,
+                            progress = -1,
+                            text = audioTitle.ifBlank { "معالجة الصوت" }
+                        )
+                    } else if (!processingStarted) {
+                        onProgress(progress, text)
+                        NotificationUtil.notifyProgress(
+                            title = "جاري التحميل...",
+                            notificationId = notifId,
+                            progress = progress.toInt().coerceIn(0, 100),
+                            text = text
+                        )
+                    }
+                }
+
+                // إشعار اكتمال
+                NotificationUtil.finishNotification(
+                    notificationId = notifId,
+                    title = "تم التحميل ✅",
+                    text = audioTitle.ifBlank { "صوت بدون موسيقى" }
+                )
+
+                // حفظ في قاعدة البيانات
+                saveToHistory(url, audioTitle.ifBlank { "Audio (No Music)" }, downloadPath)
+
+                // تحديث MediaStore ليظهر في الاستديو فوراً
+                scanDownloadedFiles(context, downloadPath)
+
+                withContext(Dispatchers.Main) {
+                    onComplete(Result.success(downloadPath))
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Audio-no-music download failed", e)
+                NotificationUtil.cancelNotification(notifId)
+                withContext(Dispatchers.Main) {
+                    onComplete(Result.failure(e))
+                }
+            }
+        }
+    }
+
+    /**
      * تحديث yt-dlp تلقائياً
      */
     suspend fun updateYtDlp(context: Context): Boolean =

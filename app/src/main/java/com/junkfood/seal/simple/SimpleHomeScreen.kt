@@ -163,7 +163,7 @@ fun SimpleHomeScreen(initialUrl: String = "") {
     }
 
     // بدء التحميل عبر Foreground Service
-    fun startDownload(isAudio: Boolean) {
+    fun startDownload(isAudio: Boolean, noMusic: Boolean = false) {
         val trimmedUrl = url.trim()
         if (trimmedUrl.isBlank()) {
             statusMessage = s("error_enter_url")
@@ -178,7 +178,7 @@ fun SimpleHomeScreen(initialUrl: String = "") {
         statusText = ""
 
         // بدء التحميل عبر Service
-        SimpleDownloadService.startDownload(context, trimmedUrl, isAudio)
+        SimpleDownloadService.startDownload(context, trimmedUrl, isAudio, noMusic)
     }
 
     // التنقل بين الشاشات
@@ -361,7 +361,7 @@ fun SimpleHomeScreen(initialUrl: String = "") {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // أزرار التحميل
+            // زر تحميل الفيديو
             Button(
                 onClick = { startDownload(false) },
                 modifier = Modifier
@@ -375,6 +375,21 @@ fun SimpleHomeScreen(initialUrl: String = "") {
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // زر تحميل بدون موسيقى 🔇
+            FilledTonalButton(
+                onClick = { startDownload(isAudio = true, noMusic = true) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = !isDownloading,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(s("download_no_music"), fontSize = 20.sp)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // زر تحميل الصوت
             OutlinedButton(
                 onClick = { startDownload(true) },
                 modifier = Modifier
@@ -400,8 +415,8 @@ fun SimpleHomeScreen(initialUrl: String = "") {
                         label = "progress"
                     )
 
-                    // إذا كان في مرحلة التحويل (99%) اعرض شريط غير محدد
-                    if (statusText.contains("تحويل") || statusText.contains("MP3")) {
+                    // شريط غير محدد أثناء التحويل أو إزالة الموسيقى
+                    if (statusText.contains("تحويل") || statusText.contains("MP3") || statusText.contains("إزالة")) {
                         LinearProgressIndicator(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -419,9 +434,11 @@ fun SimpleHomeScreen(initialUrl: String = "") {
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = if (statusText.contains("تحويل") || statusText.contains("MP3"))
-                            "🔄 ${s("converting")}"
-                        else "${(progress * 100).toInt()}%",
+                        text = when {
+                            statusText.contains("إزالة") -> "🔇 ${s("removing_music")}"
+                            statusText.contains("تحويل") || statusText.contains("MP3") -> "🔄 ${s("converting")}"
+                            else -> "${(progress * 100).toInt()}%"
+                        },
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.primary
                     )

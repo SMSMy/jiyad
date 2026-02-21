@@ -26,6 +26,7 @@ class SimpleDownloadService : Service() {
 
         const val ACTION_DOWNLOAD_VIDEO = "download_video"
         const val ACTION_DOWNLOAD_AUDIO = "download_audio"
+        const val ACTION_DOWNLOAD_AUDIO_NO_MUSIC = "download_audio_no_music"
         const val EXTRA_URL = "url"
 
         // حالة التحميل المُراقَبة من الـ UI
@@ -42,9 +43,14 @@ class SimpleDownloadService : Service() {
         var onProgressUpdate: ((Float, String) -> Unit)? = null
         var onDownloadComplete: ((Result<String>) -> Unit)? = null
 
-        fun startDownload(context: Context, url: String, isAudio: Boolean) {
+        fun startDownload(context: Context, url: String, isAudio: Boolean, noMusic: Boolean = false) {
+            val action = when {
+                noMusic -> ACTION_DOWNLOAD_AUDIO_NO_MUSIC
+                isAudio -> ACTION_DOWNLOAD_AUDIO
+                else -> ACTION_DOWNLOAD_VIDEO
+            }
             val intent = Intent(context, SimpleDownloadService::class.java).apply {
-                action = if (isAudio) ACTION_DOWNLOAD_AUDIO else ACTION_DOWNLOAD_VIDEO
+                this.action = action
                 putExtra(EXTRA_URL, url)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -73,7 +79,7 @@ class SimpleDownloadService : Service() {
         startForeground(SERVICE_NOTIFICATION_ID, notification)
 
         val url = intent?.getStringExtra(EXTRA_URL) ?: return START_NOT_STICKY
-        val isAudio = intent.action == ACTION_DOWNLOAD_AUDIO
+        val action = intent.action
 
         activeDownloads++
         isDownloading = true
@@ -82,7 +88,11 @@ class SimpleDownloadService : Service() {
         lastResult = null
 
         serviceScope?.launch {
-            val downloadFn = if (isAudio) JiyadDownloader::downloadAudio else JiyadDownloader::downloadVideo
+            val downloadFn = when (action) {
+                ACTION_DOWNLOAD_AUDIO -> JiyadDownloader::downloadAudio
+                ACTION_DOWNLOAD_AUDIO_NO_MUSIC -> JiyadDownloader::downloadAudioNoMusic
+                else -> JiyadDownloader::downloadVideo
+            }
 
             downloadFn(
                 this@SimpleDownloadService,
