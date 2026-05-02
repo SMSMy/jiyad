@@ -53,7 +53,7 @@
 
 <br>
 
-## ⬇️ Download / التحميل
+## ⬇️ Download / التحميـل
 
 Download the latest APK from the **Releases** page:
 حمل آخر نسخة من صفحة الإصدارات:
@@ -77,7 +77,7 @@ Jiyad is built on top of excellent open-source projects:
 - **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** - محرك التحميل القوي
 - **[youtubedl-android](https://github.com/yausername/youtubedl-android)** - غلاف أندرويد لـ yt-dlp
 
-## 💬 Support / الدعم
+## 💬 Support / الدعـم
 
 Need help? / تحتاج مساعدة؟
 
@@ -88,7 +88,7 @@ Need help? / تحتاج مساعدة؟
 
 **صُنع بـ ❤️ لتحميل أسهل**
 
-## 🤝 Contributing / المساهمة
+## 🤝 Contributing / المساهمــة
 
 Contributions are welcome! / المساهمات مرحب بها!
 
