@@ -6,30 +6,13 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.junkfood.seal.App.Companion.context
-import com.junkfood.seal.simple.JiyadPreset
-import com.junkfood.seal.simple.SimpleHomeScreen
+import com.junkfood.seal.simple.JiyadRoot
 import com.junkfood.seal.ui.common.LocalDarkTheme
 import com.junkfood.seal.ui.common.SettingsProvider
-import com.junkfood.seal.ui.page.AppEntry
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel
 import com.junkfood.seal.ui.theme.SealTheme
 import com.junkfood.seal.util.PreferenceUtil
@@ -63,32 +46,7 @@ class MainActivity : AppCompatActivity() {
                         darkTheme = LocalDarkTheme.current.isDarkTheme(),
                         isHighContrastModeEnabled = LocalDarkTheme.current.isHighContrastModeEnabled,
                     ) {
-                        var uiMode by remember { mutableStateOf(JiyadPreset.getUiMode()) }
-
-                        if (uiMode == JiyadPreset.UI_MODE_ADVANCED) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                AppEntry(dialogViewModel = dialogViewModel)
-                                ExtendedFloatingActionButton(
-                                    text = { Text("العودة للواجهة المبسطة", fontSize = 16.sp) },
-                                    icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) },
-                                    onClick = {
-                                        JiyadPreset.setUiMode(JiyadPreset.UI_MODE_SIMPLE)
-                                        uiMode = JiyadPreset.UI_MODE_SIMPLE
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(16.dp),
-                                )
-                            }
-                        } else {
-                            SimpleHomeScreen(
-                                initialUrl = sharedUrlState.value,
-                                onSwitchToAdvanced = {
-                                    JiyadPreset.setUiMode(JiyadPreset.UI_MODE_ADVANCED)
-                                    uiMode = JiyadPreset.UI_MODE_ADVANCED
-                                }
-                            )
-                        }
+                        JiyadRoot(dialogViewModel = dialogViewModel, sharedUrl = sharedUrlState.value)
                     }
                 }
             }
