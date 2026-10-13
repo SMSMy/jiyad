@@ -180,4 +180,68 @@ class JiyadPresetTest {
         assertFalse(JiyadPreset.isEligibleUrl("https://example.com\nhttps://other.com"))
         assertFalse(JiyadPreset.isEligibleUrl("https://example.com with some text"))
     }
+
+    @Test
+    fun testHistoryMigration_singleFileInDir_correctsPath() {
+        val tempDir = java.io.File.createTempFile("jiyad_test_dir", "").apply {
+            delete()
+            mkdirs()
+        }
+        val mediaFile = java.io.File(tempDir, "video.mp4").apply { createNewFile() }
+
+        val decision = JiyadPreset.evaluateHistoryItemMigration(
+            videoPath = tempDir.absolutePath,
+            extractor = "Jiyad",
+            listFiles = { listOf(mediaFile) }
+        )
+
+        assertTrue(decision.needsCorrection)
+        assertEquals(mediaFile.absolutePath, decision.newPath)
+        assertFalse(decision.isUnavailable)
+
+        mediaFile.delete()
+        tempDir.delete()
+    }
+
+    @Test
+    fun testHistoryMigration_multipleFilesInDir_marksUnavailable() {
+        val tempDir = java.io.File.createTempFile("jiyad_test_dir_multi", "").apply {
+            delete()
+            mkdirs()
+        }
+        val media1 = java.io.File(tempDir, "video1.mp4").apply { createNewFile() }
+        val media2 = java.io.File(tempDir, "video2.mp4").apply { createNewFile() }
+
+        val decision = JiyadPreset.evaluateHistoryItemMigration(
+            videoPath = tempDir.absolutePath,
+            extractor = "Jiyad",
+            listFiles = { listOf(media1, media2) }
+        )
+
+        assertFalse(decision.needsCorrection)
+        assertTrue(decision.isUnavailable)
+
+        media1.delete()
+        media2.delete()
+        tempDir.delete()
+    }
+
+    @Test
+    fun testHistoryMigration_emptyDir_marksUnavailable() {
+        val tempDir = java.io.File.createTempFile("jiyad_test_dir_empty", "").apply {
+            delete()
+            mkdirs()
+        }
+
+        val decision = JiyadPreset.evaluateHistoryItemMigration(
+            videoPath = tempDir.absolutePath,
+            extractor = "Jiyad",
+            listFiles = { emptyList() }
+        )
+
+        assertFalse(decision.needsCorrection)
+        assertTrue(decision.isUnavailable)
+
+        tempDir.delete()
+    }
 }

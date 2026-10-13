@@ -143,6 +143,11 @@ fun SimpleHomeScreen(
             } catch (_: Exception) {}
         }
 
+        // ترحيل السجل لمرة واحدة (المرحلة 4.2)
+        try {
+            JiyadPreset.migrateHistoryIfNeeded()
+        } catch (_: Exception) {}
+
         // تحديث التطبيق
         try {
             val info = SimpleAppUpdater.checkForUpdate()

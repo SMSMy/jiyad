@@ -20,8 +20,12 @@ import com.junkfood.seal.util.PreferenceUtil.getString
 import com.junkfood.seal.util.PreferenceUtil.updateBoolean
 import com.junkfood.seal.util.PreferenceUtil.updateString
 import com.junkfood.seal.util.VIDEO_DIRECTORY
+import com.junkfood.seal.util.DatabaseUtil
 import com.junkfood.seal.util.UpdateUtil
 import com.yausername.youtubedl_android.YoutubeDL
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import org.koin.core.context.GlobalContext
 import java.io.File
 
@@ -237,6 +241,80 @@ object JiyadPreset {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start quick download in simple mode", e)
             false
+        }
+    }
+
+    const val KEY_HISTORY_MIGRATED_V1 = "jiyad_history_fixed_v1"
+
+    data class MigrationDecision(
+        val needsCorrection: Boolean,
+        val newPath: String?,
+        val isUnavailable: Boolean
+    )
+
+    /**
+     * تقييم ترحيل سجل التنزيل لمرة واحدة (المرحلة 4.2):
+     * - الصفوف التي تحمل مسار مجلد أو extractor == "Jiyad" تُفحص:
+     *   إذا وُجد ملف وحيد واضح في المجلد يُصحح المسار إليه، وإلا تُعلَّم «غير متاح» دون حذف السجل.
+     */
+    fun evaluateHistoryItemMigration(
+        videoPath: String,
+        extractor: String?,
+        listFiles: (File) -> List<File>? = { it.listFiles()?.toList() }
+    ): MigrationDecision {
+        val file = File(videoPath)
+        val isDir = file.isDirectory
+        val isOldJiyad = extractor == "Jiyad" || isDir
+
+        if (!isOldJiyad && file.exists() && file.isFile) {
+            return MigrationDecision(needsCorrection = false, newPath = null, isUnavailable = false)
+        }
+
+        if (isOldJiyad) {
+            val dir = if (isDir) file else file.parentFile
+            if (dir != null && dir.exists() && dir.isDirectory) {
+                val candidateFiles = listFiles(dir)?.filter { f ->
+                    f.isFile && !f.name.startsWith(".") &&
+                        (f.name.endsWith(".mp4", ignoreCase = true) ||
+                         f.name.endsWith(".mp3", ignoreCase = true) ||
+                         f.name.endsWith(".m4a", ignoreCase = true) ||
+                         f.name.endsWith(".webm", ignoreCase = true) ||
+                         f.name.endsWith(".mkv", ignoreCase = true))
+                } ?: emptyList()
+
+                if (candidateFiles.size == 1) {
+                    return MigrationDecision(
+                        needsCorrection = true,
+                        newPath = candidateFiles[0].absolutePath,
+                        isUnavailable = false
+                    )
+                }
+            }
+            return MigrationDecision(needsCorrection = false, newPath = null, isUnavailable = true)
+        }
+
+        val exists = file.exists() && file.isFile
+        return MigrationDecision(needsCorrection = false, newPath = null, isUnavailable = !exists)
+    }
+
+    /**
+     * تنفيذ ترحيل السجل لمرة واحدة في الخلفية (المرحلة 4.2)
+     */
+    suspend fun migrateHistoryIfNeeded() = withContext(Dispatchers.IO) {
+        if (KEY_HISTORY_MIGRATED_V1.getBoolean(false)) return@withContext
+        try {
+            val list = DatabaseUtil.getDownloadHistoryFlow().first()
+            for (info in list) {
+                val decision = evaluateHistoryItemMigration(info.videoPath, info.extractor)
+                if (decision.needsCorrection && decision.newPath != null) {
+                    DatabaseUtil.deleteInfoById(info.id)
+                    DatabaseUtil.insertInfo(info.copy(id = 0, videoPath = decision.newPath))
+                }
+            }
+            KEY_HISTORY_MIGRATED_V1.updateBoolean(true)
+            Log.d(TAG, "History migration completed successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to migrate history", e)
         }
     }
 }
