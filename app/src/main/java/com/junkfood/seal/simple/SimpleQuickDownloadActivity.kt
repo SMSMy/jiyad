@@ -5,16 +5,21 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.junkfood.seal.App
+import com.junkfood.seal.download.DownloaderV2
+import com.junkfood.seal.download.Task
 import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.matchUrlFromSharedText
 import com.junkfood.seal.util.setLanguage
 import kotlinx.coroutines.runBlocking
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 /**
- * نشاط التحميل السريع - يبدأ التحميل فوراً كفيديو عند مشاركة الرابط
- * هذا النشاط يستخدم بدلاً من QuickDownloadActivity الأصلي
+ * نشاط التحميل السريع - يبدأ التحميل فوراً كفيديو عند مشاركة الرابط عبر DownloaderV2 الموحد
+ * (مؤقت حتى نقل فلاتر المشاركة في المانيفست في المرحلة 3.4)
  */
-class SimpleQuickDownloadActivity : ComponentActivity() {
+class SimpleQuickDownloadActivity : ComponentActivity(), KoinComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +35,13 @@ class SimpleQuickDownloadActivity : ComponentActivity() {
             return
         }
 
-        // بدء التحميل فوراً كفيديو
+        // بدء التحميل فوراً كفيديو عبر DownloaderV2 الموحد
+        App.startService()
+        JiyadPreset.initPresetAndSyncMemory()
+        val downloader: DownloaderV2 = get()
+        downloader.enqueue(Task(url = url, preferences = JiyadPreset.createVideoPreferences()))
+
         Toast.makeText(this, "⏳ جاري التحميل...", Toast.LENGTH_SHORT).show()
-        SimpleDownloadService.startDownload(this, url, isAudio = false)
 
         finish()
     }
@@ -52,3 +61,4 @@ class SimpleQuickDownloadActivity : ComponentActivity() {
         }
     }
 }
+
