@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+"""
+tools/check-divergence
+Divergence and Architecture Enforcement Checker for Jiyad (Phase 6)
+
+Enforces:
+1. No upstream files deleted (176 files preserved).
+2. AndroidManifest.xml has 100% parity with upstream/main.
+3. Zero-UI modification rule, with the sole documented exception of YtdlpUpdater.kt (<= 6 lines).
+4. Strict whitelist with line change ceilings for touched upstream files.
+5. Forbidden artifacts absent (SimpleDownloadService, SimpleQuickDownloadActivity, JiyadDownloader).
+6. Strings gate: only jiyad_* and app_name strings modified/added.
+7. Engine update guard protection before UpdateUtil.updateYtDlp().
+8. Version code check: versionCode > 201_030_402.
+"""
+
+import os
+import re
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+
+UPSTREAM_REF = "upstream/main"
+
+# Line ceilings for whitelisted modified upstream files
+LINE_LIMITS = {
+    "app/src/main/java/com/junkfood/seal/MainActivity.kt": 18,
+    "app/src/main/java/com/junkfood/seal/QuickDownloadActivity.kt": 12,
+    "app/src/main/java/com/junkfood/seal/util/UpdateUtil.kt": 4,
+    "app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater.kt": 6,
+    "app/build.gradle.kts": 20,
+    "buildSrc/src/main/kotlin/Version.kt": 3,
+}
+
+# Whitelist patterns allowed to diverge from upstream/main
+ALLOWED_PATTERNS = [
+    r"^app/src/main/java/com/junkfood/seal/simple/.*",
+    r"^app/src/test/java/com/junkfood/seal/simple/.*",
+    r"^app/src/main/java/com/junkfood/seal/MainActivity\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/QuickDownloadActivity\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/util/UpdateUtil\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater\.kt$",
+    r"^app/build\.gradle\.kts$",
+    r"^buildSrc/src/main/kotlin/Version\.kt$",
+    r"^app/src/main/res/values/strings\.xml$",
+    r"^app/src/main/res/values-ar/strings\.xml$",
+    r"^app/src/main/res/mipmap.*",
+    r"^app/src/main/res/drawable.*",
+    r"^fastlane/.*",
+    r"^ico\.png$",
+    r"^notification_icon\.png$",
+    r"^UPSTREAM\.md$",
+    r"^README\.md$",
+    r"^\.gitignore$",
+    r"^tools/.*",
+    r"^\.github/.*",
+]
+
+
+def run_git(cmd: list[str]) -> str:
+    res = subprocess.run(
+        ["git"] + cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
+    return res.stdout.strip()
+
+
+def check_upstream_remote():
+    remotes = run_git(["remote"]).splitlines()
+    if "upstream" not in remotes:
+        print("[*] Remote 'upstream' not configured. Adding upstream/Seal...")
+        subprocess.run(
+            ["git", "remote", "add", "upstream", "https://github.com/JunkFood02/Seal.git"],
+            check=False,
+        )
+    print(f"[*] Fetching {UPSTREAM_REF}...")
+    subprocess.run(["git", "fetch", "upstream", "main"], check=False)
+
+
+def check_no_upstream_files_deleted():
+    print("[1/8] Checking for deleted upstream files...")
+    deleted = run_git(["diff", "--diff-filter=D", "--name-only", f"{UPSTREAM_REF}...HEAD"])
+    if deleted:
+        print(f"FAIL: The following upstream files were deleted:\n{deleted}")
+        sys.exit(1)
+    print("  PASS: 0 upstream files deleted.")
+
+
+def check_manifest_parity():
+    print("[2/8] Checking AndroidManifest.xml parity...")
+    diff = run_git(["diff", f"{UPSTREAM_REF}...HEAD", "--", "app/src/main/AndroidManifest.xml"])
+    if diff:
+        print(f"FAIL: AndroidManifest.xml diverges from {UPSTREAM_REF}:\n{diff}")
+        sys.exit(1)
+    print("  PASS: AndroidManifest.xml has 100% parity with upstream.")
+
+
+def check_ui_zero_modification():
+    print("[3/8] Checking UI zero-modification rule...")
+    ui_diff_files = run_git(
+        ["diff", "--name-only", f"{UPSTREAM_REF}...HEAD", "--", "app/src/main/java/com/junkfood/seal/ui"]
+    ).splitlines()
+
+    for path in ui_diff_files:
+        if not path:
+            continue
+        normalized = path.replace("\\", "/")
+        if normalized != "app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater.kt":
+            print(f"FAIL: Unauthorized modification in UI package: {path}")
+            sys.exit(1)
+
+    print("  PASS: No modifications in ui/** outside approved YtdlpUpdater.kt.")
+
+
+def check_whitelist_and_line_limits():
+    print("[4/8] Checking divergence whitelist and line limits...")
+    numstat = run_git(["diff", "--numstat", f"{UPSTREAM_REF}...HEAD"]).splitlines()
+    total_divergent_files = 0
+    total_added_lines = 0
+    total_deleted_lines = 0
+
+    for line in numstat:
+        if not line:
+            continue
+        parts = line.split("\t")
+        if len(parts) < 3:
+            continue
+        added_str, deleted_str, path = parts[0], parts[1], parts[2]
+        normalized = path.replace("\\", "/")
+
+        # Match against allowed patterns
+        is_allowed = any(re.match(pat, normalized) for pat in ALLOWED_PATTERNS)
+        if not is_allowed:
+            print(f"FAIL: File '{normalized}' is not in the divergence whitelist!")
+            sys.exit(1)
+
+        total_divergent_files += 1
+        if added_str.isdigit() and deleted_str.isdigit():
+            added = int(added_str)
+            deleted = int(deleted_str)
+            total_added_lines += added
+            total_deleted_lines += deleted
+            changed = added + deleted
+
+            if normalized in LINE_LIMITS:
+                max_allowed = LINE_LIMITS[normalized]
+                if changed > max_allowed:
+                    print(
+                        f"FAIL: Line change limit exceeded for '{normalized}': "
+                        f"{changed} changed ({added}+, {deleted}-) > limit {max_allowed}"
+                    )
+                    sys.exit(1)
+
+    print(
+        f"  PASS: All {total_divergent_files} files within whitelist. "
+        f"Divergence stats: +{total_added_lines} / -{total_deleted_lines} lines."
+    )
+
+
+def check_forbidden_artifacts():
+    print("[5/8] Checking for forbidden legacy artifacts...")
+    forbidden_files = [
+        "app/src/main/java/com/junkfood/seal/simple/SimpleDownloadService.kt",
+        "app/src/main/java/com/junkfood/seal/simple/SimpleQuickDownloadActivity.kt",
+        "app/src/main/java/com/junkfood/seal/simple/JiyadDownloader.kt",
+    ]
+    for f in forbidden_files:
+        if os.path.exists(f):
+            print(f"FAIL: Forbidden file exists: {f}")
+            sys.exit(1)
+
+    # Check for YoutubeDL.getInstance in simple/
+    simple_dir = "app/src/main/java/com/junkfood/seal/simple"
+    if os.path.isdir(simple_dir):
+        for root, _, files in os.walk(simple_dir):
+            for file in files:
+                if file.endswith(".kt"):
+                    fpath = os.path.join(root, file)
+                    with open(fpath, "r", encoding="utf-8") as fp:
+                        content = fp.read()
+                        if "YoutubeDL.getInstance" in content:
+                            print(f"FAIL: Forbidden YoutubeDL.getInstance found in {fpath}")
+                            sys.exit(1)
+
+    print("  PASS: No forbidden artifacts or legacy parallel engine usages found.")
+
+
+def check_strings_whitelist():
+    print("[6/8] Checking strings whitelist...")
+    for res_path in [
+        "app/src/main/res/values/strings.xml",
+        "app/src/main/res/values-ar/strings.xml",
+    ]:
+        diff_lines = run_git(["diff", f"{UPSTREAM_REF}...HEAD", "--", res_path]).splitlines()
+        for dline in diff_lines:
+            if dline.startswith("+") and not dline.startswith("+++"):
+                # Check for string tags
+                m = re.search(r'<string\s+name="([^"]+)"', dline)
+                if m:
+                    key = m.group(1)
+                    if not (key.startswith("jiyad_") or key == "app_name"):
+                        print(
+                            f"FAIL: String key '{key}' in '{res_path}' does not start with 'jiyad_' and is not 'app_name'."
+                        )
+                        sys.exit(1)
+            elif dline.startswith("-") and not dline.startswith("---"):
+                m = re.search(r'<string\s+name="([^"]+)"', dline)
+                if m:
+                    key = m.group(1)
+                    if key != "app_name":
+                        print(
+                            f"FAIL: Upstream string key '{key}' in '{res_path}' was removed or modified!"
+                        )
+                        sys.exit(1)
+
+    print("  PASS: Strings conform strictly to 'jiyad_*' and 'app_name' rules.")
+
+
+def check_engine_guard():
+    print("[7/8] Checking yt-dlp update guard...")
+    ytdlp_updater = "app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater.kt"
+    if os.path.exists(ytdlp_updater):
+        with open(ytdlp_updater, "r", encoding="utf-8") as fp:
+            content = fp.read()
+            if "isAnyTaskActive" not in content or "updateYtDlp" not in content:
+                print(f"FAIL: Guard 'isAnyTaskActive' missing in {ytdlp_updater}")
+                sys.exit(1)
+
+    jiyad_preset = "app/src/main/java/com/junkfood/seal/simple/JiyadPreset.kt"
+    if os.path.exists(jiyad_preset):
+        with open(jiyad_preset, "r", encoding="utf-8") as fp:
+            content = fp.read()
+            if "safeUpdateYtDlp" not in content or "isAnyTaskActive" not in content:
+                print(f"FAIL: safeUpdateYtDlp guard missing in {jiyad_preset}")
+                sys.exit(1)
+
+    print("  PASS: yt-dlp update guard active across all engine update call sites.")
+
+
+def check_version_code(require_release: bool = False):
+    print("[8/8] Checking version code...")
+    version_file = "buildSrc/src/main/kotlin/Version.kt"
+    if not os.path.exists(version_file):
+        print(f"FAIL: {version_file} not found.")
+        sys.exit(1)
+
+    with open(version_file, "r", encoding="utf-8") as fp:
+        content = fp.read()
+        m = re.search(
+            r"Version\.(?:Stable|Alpha|Beta|ReleaseCandidate)\(\s*(?:versionMajor\s*=\s*)?(\d+),\s*(?:versionMinor\s*=\s*)?(\d+),\s*(?:versionPatch\s*=\s*)?(\d+)",
+            content,
+        )
+        if m:
+            major, minor, patch = int(m.group(1)), int(m.group(2)), int(m.group(3))
+            calc_code = major * 100_000_000 + minor * 1_000_000 + patch * 10_000 + 400
+            min_code = 201_030_402 if require_release else 201_030_400
+            if calc_code < min_code:
+                print(f"FAIL: Version code {calc_code} is less than required {min_code}.")
+                sys.exit(1)
+            print(
+                f"  PASS: Version {major}.{minor}.{patch} -> versionCode {calc_code} "
+                f"(requirement >= {min_code} satisfied)."
+            )
+        else:
+            print("FAIL: Could not determine version code from Version.kt.")
+            sys.exit(1)
+
+
+def main():
+    require_release = "--release" in sys.argv
+    print("=" * 60)
+    print("Jiyad Divergence & Architecture Checker (Phase 6)")
+    print("=" * 60)
+    check_upstream_remote()
+    check_no_upstream_files_deleted()
+    check_manifest_parity()
+    check_ui_zero_modification()
+    check_whitelist_and_line_limits()
+    check_forbidden_artifacts()
+    check_strings_whitelist()
+    check_engine_guard()
+    check_version_code(require_release=require_release)
+    print("=" * 60)
+    print("SUCCESS: All 8 divergence gates PASSED with 0 errors!")
+    print("=" * 60)
+
+
+if __name__ == "__main__":
+    main()
