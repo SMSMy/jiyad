@@ -3,6 +3,7 @@ package com.junkfood.seal.simple
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -15,8 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.junkfood.seal.R
 import com.junkfood.seal.ui.page.AppEntry
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel
 
@@ -35,7 +38,7 @@ fun JiyadRoot(
         Box(modifier = Modifier.fillMaxSize()) {
             AppEntry(dialogViewModel = dialogViewModel)
             ExtendedFloatingActionButton(
-                text = { Text("العودة للواجهة المبسطة", fontSize = 16.sp) },
+                text = { Text(stringResource(R.string.jiyad_switch_to_simple), fontSize = 16.sp) },
                 icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null) },
                 onClick = {
                     JiyadPreset.setUiMode(JiyadPreset.UI_MODE_SIMPLE)
@@ -43,7 +46,8 @@ fun JiyadRoot(
                 },
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp),
             )
         }
     } else {

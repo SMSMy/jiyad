@@ -27,6 +27,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -180,7 +182,7 @@ fun SimpleHomeScreen(
                 is Task.DownloadState.FetchingInfo -> {
                     isDownloading = true
                     progress = 0f
-                    statusText = "جاري جلب المعلومات..."
+                    statusText = s("fetching_info")
                     statusMessage = s("downloading")
                 }
                 is Task.DownloadState.Completed -> {
@@ -205,7 +207,7 @@ fun SimpleHomeScreen(
                         isDownloading = false
                         progress = 0f
                         statusText = ""
-                        statusMessage = "تم الإلغاء"
+                        statusMessage = s("download_canceled")
                     }
                 }
                 is Task.DownloadState.Idle,
@@ -262,12 +264,18 @@ fun SimpleHomeScreen(
                 title = {},
                 actions = {
                     // زر التحميلات
-                    IconButton(onClick = { currentScreen = "history" }) {
+                    IconButton(
+                        onClick = { currentScreen = "history" },
+                        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    ) {
                         Icon(Icons.Default.History, contentDescription = s("download_history"))
                     }
                     // القائمة المنسدلة
                     Box {
-                        IconButton(onClick = { showMoreMenu = true }) {
+                        IconButton(
+                            onClick = { showMoreMenu = true },
+                            modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                        ) {
                             Icon(Icons.Default.MoreVert, contentDescription = s("more_options"))
                         }
                         DropdownMenu(
@@ -277,6 +285,7 @@ fun SimpleHomeScreen(
                             // تبديل اللغة
                             DropdownMenuItem(
                                 text = { Text(SimpleStrings.toggle(lang).label, fontSize = 16.sp) },
+                                modifier = Modifier.sizeIn(minHeight = 48.dp),
                                 onClick = {
                                     lang = SimpleStrings.toggle(lang)
                                     SimpleStrings.saveLanguage(context, lang)
@@ -286,6 +295,7 @@ fun SimpleHomeScreen(
                             // تحديث المحرك
                             DropdownMenuItem(
                                 text = { Text(s("update_engine"), fontSize = 16.sp) },
+                                modifier = Modifier.sizeIn(minHeight = 48.dp),
                                 onClick = {
                                     showMoreMenu = false
                                     showYtDlpDialog = true
@@ -294,6 +304,7 @@ fun SimpleHomeScreen(
                             // الوضع المتقدم - يفتح واجهة Seal الأصلية عبر المبدّل (المرحلة 3.3)
                             DropdownMenuItem(
                                 text = { Text(s("advanced_mode"), fontSize = 16.sp) },
+                                modifier = Modifier.sizeIn(minHeight = 48.dp),
                                 onClick = {
                                     showMoreMenu = false
                                     onSwitchToAdvanced()
@@ -379,16 +390,19 @@ fun SimpleHomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3,
                 trailingIcon = {
-                    Row {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         // زر مسح الرابط (X)
                         if (url.isNotBlank()) {
-                            IconButton(onClick = {
-                                url = ""
-                                videoTitle = ""
-                                videoThumbnail = ""
-                                statusMessage = ""
-                                fetchJob?.cancel()
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    url = ""
+                                    videoTitle = ""
+                                    videoThumbnail = ""
+                                    statusMessage = ""
+                                    fetchJob?.cancel()
+                                },
+                                modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                            ) {
                                 Icon(
                                     Icons.Default.Clear,
                                     contentDescription = s("clear"),
@@ -397,13 +411,16 @@ fun SimpleHomeScreen(
                             }
                         }
                         // زر اللصق
-                        TextButton(onClick = {
-                            val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
-                            clipboard?.primaryClip?.getItemAt(0)?.text?.toString()?.let { clipText ->
-                                url = clipText
-                                fetchThumbnail(clipText)
-                            }
-                        }) {
+                        TextButton(
+                            onClick = {
+                                val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
+                                clipboard?.primaryClip?.getItemAt(0)?.text?.toString()?.let { clipText ->
+                                    url = clipText
+                                    fetchThumbnail(clipText)
+                                }
+                            },
+                            modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                        ) {
                             Text(s("paste"), fontSize = 14.sp)
                         }
                     }
@@ -417,11 +434,14 @@ fun SimpleHomeScreen(
                 onClick = { startDownload(false) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .defaultMinSize(minHeight = 56.dp)
+                    .heightIn(min = 56.dp)
+                    .semantics { contentDescription = s("desc_download_video") },
                 enabled = !isDownloading,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                Text(s("download_video"), fontSize = 20.sp)
+                Text(s("download_video"), fontSize = 20.sp, textAlign = TextAlign.Center)
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -430,11 +450,14 @@ fun SimpleHomeScreen(
                 onClick = { startDownload(true) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .defaultMinSize(minHeight = 56.dp)
+                    .heightIn(min = 56.dp)
+                    .semantics { contentDescription = s("desc_download_audio") },
                 enabled = !isDownloading,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                Text(s("download_audio"), fontSize = 20.sp)
+                Text(s("download_audio"), fontSize = 20.sp, textAlign = TextAlign.Center)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -474,7 +497,12 @@ fun SimpleHomeScreen(
                             "🔄 ${s("converting")}"
                         else "${(progress * 100).toInt()}%",
                         fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.semantics {
+                            contentDescription = if (statusText.contains("تحويل") || statusText.contains("MP3"))
+                                s("converting")
+                            else "${(progress * 100).toInt()}%"
+                        }
                     )
                     if (statusText.isNotBlank()) {
                         Text(
@@ -493,6 +521,7 @@ fun SimpleHomeScreen(
             // رسالة الحالة
             if (statusMessage.isNotBlank() && !isDownloading) {
                 Spacer(modifier = Modifier.height(12.dp))
+                val cleanDescription = statusMessage.removePrefix("✅ ").removePrefix("❌ ").trim()
                 Text(
                     text = statusMessage,
                     fontSize = 18.sp,
@@ -501,7 +530,10 @@ fun SimpleHomeScreen(
                         MaterialTheme.colorScheme.primary
                     else if (statusMessage.startsWith("❌"))
                         MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.semantics {
+                        contentDescription = cleanDescription
+                    }
                 )
             }
 
@@ -559,28 +591,34 @@ private fun YtDlpUpdateDialog(
         },
         confirmButton = {
             if (!isUpdating && resultMessage.isBlank()) {
-                TextButton(onClick = {
-                    isUpdating = true
-                    scope.launch {
-                        if (JiyadPreset.isAnyTaskRunning(downloader)) {
-                            resultMessage = "لا يمكن تحديث المحرك أثناء وجود تنزيل نشط. يرجى الانتظار حتى اكتمال التنزيل."
-                        } else {
-                            val status = JiyadPreset.safeUpdateYtDlp(downloader)
-                            resultMessage = if (status == YoutubeDL.UpdateStatus.DONE) {
-                                s("ytdlp_updated")
+                TextButton(
+                    onClick = {
+                        isUpdating = true
+                        scope.launch {
+                            if (JiyadPreset.isAnyTaskRunning(downloader)) {
+                                resultMessage = s("ytdlp_update_postponed")
                             } else {
-                                s("ytdlp_already_latest")
+                                val status = JiyadPreset.safeUpdateYtDlp(downloader)
+                                resultMessage = if (status == YoutubeDL.UpdateStatus.DONE) {
+                                    s("ytdlp_updated")
+                                } else {
+                                    s("ytdlp_already_latest")
+                                }
                             }
+                            isUpdating = false
                         }
-                        isUpdating = false
-                    }
-                }) {
+                    },
+                    modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                ) {
                     Text(s("update_now"), fontSize = 16.sp)
                 }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            ) {
                 Text(s("close"), fontSize = 16.sp)
             }
         }
@@ -615,13 +653,24 @@ private fun InAppUpdateDialog(
             ) {
                 if (errorMessage.isNotBlank()) {
                     // حالة الخطأ
-                    Text("❌ $errorMessage", fontSize = 16.sp)
+                    Text(
+                        text = "❌ $errorMessage",
+                        fontSize = 16.sp,
+                        modifier = Modifier.semantics { contentDescription = errorMessage }
+                    )
                 } else if (downloadedApk != null) {
                     // التحميل اكتمل - جاهز للتثبيت
-                    Text("✅ ${s("update_ready")}", fontSize = 18.sp)
+                    Text(
+                        text = "✅ ${s("update_ready")}",
+                        fontSize = 18.sp,
+                        modifier = Modifier.semantics { contentDescription = s("update_ready") }
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(s("update_tap_install"), fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = s("update_tap_install"),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 } else if (isDownloadingUpdate) {
                     // جاري تحميل التحديث
                     Text("${s("update_downloading")} $downloadProgress%", fontSize = 18.sp)
@@ -652,10 +701,11 @@ private fun InAppUpdateDialog(
                     if (downloadedApk != null && !SimpleAppUpdater.canInstallApks(context)) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "⚠️ لتثبيت التحديث، يرجى الضغط على زر التثبيت ثم تفعيل خيار «السماح بتثبيت التطبيقات من هذا المصدر» في شاشة الإعدادات.",
+                            text = "⚠️ ${s("update_install_guide")}",
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.semantics { contentDescription = s("update_install_guide") }
                         )
                     }
                 }
@@ -665,43 +715,52 @@ private fun InAppUpdateDialog(
             when {
                 downloadedApk != null -> {
                     // زر التثبيت
-                    TextButton(onClick = {
-                        if (SimpleAppUpdater.canInstallApks(context)) {
-                            SimpleAppUpdater.installApk(context, downloadedApk!!)
-                        } else {
-                            SimpleAppUpdater.requestInstallPermission(context)
-                        }
-                    }) {
+                    TextButton(
+                        onClick = {
+                            if (SimpleAppUpdater.canInstallApks(context)) {
+                                SimpleAppUpdater.installApk(context, downloadedApk!!)
+                            } else {
+                                SimpleAppUpdater.requestInstallPermission(context)
+                            }
+                        },
+                        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    ) {
                         Text(s("install_update"), fontSize = 16.sp)
                     }
                 }
                 errorMessage.isNotBlank() -> {
                     // إعادة المحاولة
-                    TextButton(onClick = {
-                        errorMessage = ""
-                    }) {
+                    TextButton(
+                        onClick = {
+                            errorMessage = ""
+                        },
+                        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    ) {
                         Text(s("retry"), fontSize = 16.sp)
                     }
                 }
                 !isDownloadingUpdate -> {
                     // زر بدء التحديث
-                    TextButton(onClick = {
-                        isDownloadingUpdate = true
-                        downloadProgress = 0
-                        scope.launch {
-                            val apk = SimpleAppUpdater.downloadApk(
-                                context = context,
-                                downloadUrl = updateInfo.downloadUrl,
-                                onProgress = { downloadProgress = it }
-                            )
-                            isDownloadingUpdate = false
-                            if (apk != null) {
-                                downloadedApk = apk
-                            } else {
-                                errorMessage = s("update_download_failed")
+                    TextButton(
+                        onClick = {
+                            isDownloadingUpdate = true
+                            downloadProgress = 0
+                            scope.launch {
+                                val apk = SimpleAppUpdater.downloadApk(
+                                    context = context,
+                                    downloadUrl = updateInfo.downloadUrl,
+                                    onProgress = { downloadProgress = it }
+                                )
+                                isDownloadingUpdate = false
+                                if (apk != null) {
+                                    downloadedApk = apk
+                                } else {
+                                    errorMessage = s("update_download_failed")
+                                }
                             }
-                        }
-                    }) {
+                        },
+                        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    ) {
                         Text(s("update_now"), fontSize = 16.sp)
                     }
                 }
@@ -709,7 +768,10 @@ private fun InAppUpdateDialog(
         },
         dismissButton = {
             if (!isDownloadingUpdate) {
-                TextButton(onClick = onDismiss) {
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                ) {
                     Text(s("later"), fontSize = 16.sp)
                 }
             }

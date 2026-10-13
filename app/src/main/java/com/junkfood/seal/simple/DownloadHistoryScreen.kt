@@ -17,6 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -103,7 +105,7 @@ fun DownloadHistoryScreen(
                         lang = lang,
                         onOpenFile = {
                             FileUtil.openFile(path = download.videoPath) {
-                                Toast.makeText(context, "⚠️ الملف غير متوفر على الجهاز", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, s("file_unavailable"), Toast.LENGTH_SHORT).show()
                             }
                         },
                         onShareFile = {
@@ -114,10 +116,10 @@ fun DownloadHistoryScreen(
                                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     })
                                 } catch (_: Exception) {
-                                    Toast.makeText(context, "تعذر مشاركة الملف", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, s("download_failed"), Toast.LENGTH_SHORT).show()
                                 }
                             } else {
-                                Toast.makeText(context, "⚠️ الملف غير متوفر على الجهاز", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, s("file_unavailable"), Toast.LENGTH_SHORT).show()
                             }
                         },
                         onDelete = {
@@ -167,7 +169,7 @@ private fun DownloadHistoryItem(
             ) {
                 Icon(
                     Icons.Default.PlayArrow,
-                    contentDescription = "تشغيل الملف",
+                    contentDescription = s("open_file"),
                     tint = if (isFileAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                 )
             }
@@ -182,7 +184,7 @@ private fun DownloadHistoryItem(
                 Text(
                     text = info.videoTitle,
                     fontSize = 16.sp,
-                    maxLines = 2,
+                    maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -196,11 +198,12 @@ private fun DownloadHistoryItem(
                     )
                 } else {
                     Text(
-                        text = "⚠️ الملف غير متاح على مسار التخزين",
+                        text = "⚠️ ${s("file_unavailable")}",
                         fontSize = 12.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.semantics { contentDescription = s("file_unavailable") }
                     )
                 }
             }
@@ -215,7 +218,7 @@ private fun DownloadHistoryItem(
                 ) {
                     Icon(
                         Icons.Default.Share,
-                        contentDescription = "مشاركة",
+                        contentDescription = s("share_file"),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

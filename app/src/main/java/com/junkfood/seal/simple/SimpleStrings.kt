@@ -2,11 +2,15 @@ package com.junkfood.seal.simple
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
+import androidx.annotation.StringRes
+import com.junkfood.seal.App.Companion.context
+import com.junkfood.seal.R
 import java.util.Locale
 
 /**
- * نظام الترجمة البسيط لجياد
- * Simple localization system for Jiyad
+ * نظام الترجمة والوصول لجياد (المرحلة 5)
+ * يربط المفاتيح مباشرة بموارد strings.xml الرسمية لدعم TalkBack وتغيير خط النظام.
  */
 object SimpleStrings {
 
@@ -18,110 +22,68 @@ object SimpleStrings {
         ENGLISH("en", "EN")
     }
 
-    // النصوص العربية
-    private val AR = mapOf(
-        "app_title" to "جياد",
-        "subtitle" to "تحميل سهل وسريع",
-        "url_label" to "ضع رابط الفيديو هنا",
-        "paste" to "لصق",
-        "download_video" to "تحميل فيديو 🎬",
-        "download_audio" to "تحميل صوت 🎵",
-        "error_enter_url" to "❌ أدخل الرابط أولاً",
-        "downloading" to "⏳ جاري التحميل...",
-        "download_success" to "✅ تم التحميل بنجاح!",
-        "download_failed" to "❌ فشل التحميل:",
-        "unknown_error" to "خطأ غير معروف",
-        "storage_permission" to "يجب السماح بإذن التخزين",
-        "update_available" to "تحديث جديد متوفر! 🎉",
-        "new_version" to "الإصدار الجديد:",
-        "update_now" to "تحديث الآن",
-        "later" to "لاحقاً",
-        // نصوص جديدة
-        "download_history" to "التحميلات",
-        "no_downloads" to "لا يوجد تحميلات بعد",
-        "delete" to "حذف",
-        "open_folder" to "فتح المجلد",
-        "back" to "رجوع",
-        "more_options" to "المزيد",
-        "ytdlp_update" to "تحديث محرك التحميل",
-        "ytdlp_updating" to "⏳ جاري التحديث...",
-        "ytdlp_updated" to "✅ تم التحديث بنجاح!",
-        "ytdlp_update_failed" to "❌ فشل التحديث",
-        "ytdlp_already_latest" to "✅ لديك آخر إصدار",
-        "advanced_mode" to "الوضع المتقدم ⚙️",
-        "update_engine" to "تحديث المحرك 🔄",
-        "close" to "إغلاق",
-        "converting" to "جاري التحويل...",
-        "clear" to "مسح",
-        "update_ready" to "التحديث جاهز للتثبيت",
-        "update_tap_install" to "اضغط تثبيت للمتابعة",
-        "update_downloading" to "جاري تحميل التحديث...",
-        "update_download_failed" to "فشل تحميل التحديث",
-        "install_update" to "تثبيت",
-        "retry" to "إعادة المحاولة"
-    )
-
-    // النصوص الانجليزية
-    private val EN = mapOf(
-        "app_title" to "Jiyad",
-        "subtitle" to "Easy & Fast Download",
-        "url_label" to "Paste video link here",
-        "paste" to "Paste",
-        "download_video" to "Download Video 🎬",
-        "download_audio" to "Download Audio 🎵",
-        "error_enter_url" to "❌ Enter URL first",
-        "downloading" to "⏳ Downloading...",
-        "download_success" to "✅ Download complete!",
-        "download_failed" to "❌ Download failed:",
-        "unknown_error" to "Unknown error",
-        "storage_permission" to "Storage permission is required",
-        "update_available" to "New Update Available! 🎉",
-        "new_version" to "New version:",
-        "update_now" to "Update Now",
-        "later" to "Later",
-        // New strings
-        "download_history" to "Downloads",
-        "no_downloads" to "No downloads yet",
-        "delete" to "Delete",
-        "open_folder" to "Open folder",
-        "back" to "Back",
-        "more_options" to "More",
-        "ytdlp_update" to "Update download engine",
-        "ytdlp_updating" to "⏳ Updating...",
-        "ytdlp_updated" to "✅ Updated successfully!",
-        "ytdlp_update_failed" to "❌ Update failed",
-        "ytdlp_already_latest" to "✅ Already up to date",
-        "advanced_mode" to "Advanced Mode ⚙️",
-        "update_engine" to "Update Engine 🔄",
-        "close" to "Close",
-        "converting" to "Converting...",
-        "clear" to "Clear",
-        "update_ready" to "Update ready to install",
-        "update_tap_install" to "Tap Install to continue",
-        "update_downloading" to "Downloading update...",
-        "update_download_failed" to "Update download failed",
-        "install_update" to "Install",
-        "retry" to "Retry"
-    )
-
     /**
-     * تحديد اللغة الافتراضية بناءً على لغة الجهاز
+     * خريطة ربط المفاتيح النصية بموارد strings.xml
      */
+    val stringResourceMap: Map<String, Int> = mapOf(
+        "app_title" to R.string.app_name,
+        "subtitle" to R.string.jiyad_subtitle,
+        "url_label" to R.string.jiyad_paste_url,
+        "paste" to R.string.jiyad_paste,
+        "clear" to R.string.jiyad_clear,
+        "download_video" to R.string.jiyad_download_video,
+        "desc_download_video" to R.string.jiyad_desc_download_video,
+        "download_audio" to R.string.jiyad_download_audio,
+        "desc_download_audio" to R.string.jiyad_desc_download_audio,
+        "error_enter_url" to R.string.jiyad_error_enter_url,
+        "downloading" to R.string.jiyad_downloading,
+        "download_success" to R.string.jiyad_download_success,
+        "download_failed" to R.string.jiyad_download_failed,
+        "unknown_error" to R.string.jiyad_unknown_error,
+        "storage_permission" to R.string.jiyad_storage_permission,
+        "update_available" to R.string.jiyad_update_available,
+        "new_version" to R.string.jiyad_new_version,
+        "update_now" to R.string.jiyad_update_now,
+        "later" to R.string.jiyad_later,
+        "download_history" to R.string.jiyad_download_history,
+        "no_downloads" to R.string.jiyad_no_downloads,
+        "delete" to R.string.jiyad_delete,
+        "open_file" to R.string.jiyad_open_file,
+        "share_file" to R.string.jiyad_share_file,
+        "file_unavailable" to R.string.jiyad_file_unavailable,
+        "back" to R.string.jiyad_back,
+        "more_options" to R.string.jiyad_more_options,
+        "ytdlp_update" to R.string.jiyad_ytdlp_update,
+        "ytdlp_updating" to R.string.jiyad_ytdlp_updating,
+        "ytdlp_updated" to R.string.jiyad_ytdlp_updated,
+        "ytdlp_update_failed" to R.string.jiyad_ytdlp_update_failed,
+        "ytdlp_already_latest" to R.string.jiyad_ytdlp_already_latest,
+        "ytdlp_update_postponed" to R.string.jiyad_ytdlp_update_postponed,
+        "advanced_mode" to R.string.jiyad_advanced_mode,
+        "update_engine" to R.string.jiyad_update_engine,
+        "close" to R.string.jiyad_close,
+        "converting" to R.string.jiyad_converting,
+        "update_ready" to R.string.jiyad_update_ready,
+        "update_tap_install" to R.string.jiyad_update_tap_install,
+        "update_downloading" to R.string.jiyad_update_downloading,
+        "update_download_failed" to R.string.jiyad_update_download_failed,
+        "install_update" to R.string.jiyad_install_update,
+        "retry" to R.string.jiyad_retry,
+        "update_install_guide" to R.string.jiyad_update_install_guide,
+        "switch_to_simple" to R.string.jiyad_switch_to_simple,
+        "download_canceled" to R.string.jiyad_download_canceled,
+        "fetching_info" to R.string.jiyad_fetching_info
+    )
+
     fun getDefaultLanguage(): Language {
         val deviceLang = Locale.getDefault().language
         return if (deviceLang == "ar") Language.ARABIC else Language.ENGLISH
     }
 
-    /**
-     * حفظ اللغة المختارة
-     */
     fun saveLanguage(context: Context, language: Language) {
         getPrefs(context).edit().putString(KEY_LANGUAGE, language.code).apply()
     }
 
-    /**
-     * استرجاع اللغة المحفوظة أو الافتراضية
-     */
     fun getSavedLanguage(context: Context): Language {
         val saved = getPrefs(context).getString(KEY_LANGUAGE, null)
         return when (saved) {
@@ -131,19 +93,34 @@ object SimpleStrings {
         }
     }
 
-    /**
-     * جلب نص مترجم
-     */
-    fun get(key: String, language: Language): String {
-        val strings = if (language == Language.ARABIC) AR else EN
-        return strings[key] ?: key
+    fun toggle(current: Language): Language {
+        return if (current == Language.ARABIC) Language.ENGLISH else Language.ARABIC
     }
 
     /**
-     * تبديل اللغة بين العربية والانجليزية
+     * جلب النص من موارد strings.xml المترجمة
      */
-    fun toggle(current: Language): Language {
-        return if (current == Language.ARABIC) Language.ENGLISH else Language.ARABIC
+    fun get(context: Context, key: String, language: Language = getSavedLanguage(context)): String {
+        val resId = stringResourceMap[key] ?: return key
+        return getLocalizedResource(context, resId, language)
+    }
+
+    /**
+     * دالة التوافق مع الكود القائم
+     */
+    fun get(key: String, language: Language): String {
+        return get(context, key, language)
+    }
+
+    fun getLocalizedResource(context: Context, @StringRes resId: Int, language: Language): String {
+        return try {
+            val config = Configuration(context.resources.configuration)
+            config.setLocale(Locale(language.code))
+            val localizedContext = context.createConfigurationContext(config)
+            localizedContext.resources.getString(resId)
+        } catch (_: Exception) {
+            context.getString(resId)
+        }
     }
 
     private fun getPrefs(context: Context): SharedPreferences {
