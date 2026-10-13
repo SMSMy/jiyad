@@ -5,6 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.junkfood.seal.download.DownloaderV2
 import com.junkfood.seal.download.Task
 import com.junkfood.seal.util.CONVERT_MP3
+import com.junkfood.seal.util.DownloadUtil
 import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
@@ -26,7 +27,7 @@ class JiyadPresetTest {
         assertTrue(prefs.mergeAudioStream)
         assertFalse(prefs.extractAudio)
         assertFalse(prefs.aria2c)
-        assertEquals("", prefs.outputTemplate)
+        assertEquals(DownloadUtil.OUTPUT_TEMPLATE_DEFAULT, prefs.outputTemplate)
     }
 
     @Test
@@ -37,7 +38,7 @@ class JiyadPresetTest {
         assertEquals(CONVERT_MP3, prefs.audioConvertFormat)
         assertEquals("", prefs.formatIdString)
         assertFalse(prefs.aria2c)
-        assertEquals("", prefs.outputTemplate)
+        assertEquals(DownloadUtil.OUTPUT_TEMPLATE_DEFAULT, prefs.outputTemplate)
     }
 
     @Test

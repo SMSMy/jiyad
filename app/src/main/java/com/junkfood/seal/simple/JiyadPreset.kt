@@ -59,15 +59,17 @@ object JiyadPreset {
      * - formatIdString = SimpleConfig.VIDEO_FORMAT
      * - mergeAudioStream = true
      * - aria2c = false
-     * - outputTemplate = "" (عدم لمس قالب المخرجات)
+     * - outputTemplate = DownloadUtil.OUTPUT_TEMPLATE_DEFAULT (تسمية الملف بعنوان الفيديو النظيف)
      */
-    fun createVideoPreferences(): DownloadUtil.DownloadPreferences {
+    fun createVideoPreferences(
+        outputTemplate: String = DownloadUtil.OUTPUT_TEMPLATE_DEFAULT,
+    ): DownloadUtil.DownloadPreferences {
         return DownloadUtil.DownloadPreferences.EMPTY.copy(
             formatIdString = SimpleConfig.VIDEO_FORMAT,
             mergeAudioStream = true,
             extractAudio = false,
             aria2c = false,
-            outputTemplate = "",
+            outputTemplate = outputTemplate,
         )
     }
 
@@ -77,16 +79,18 @@ object JiyadPreset {
      * - convertAudio = true مع تحويل MP3
      * - formatIdString = ""
      * - aria2c = false
-     * - outputTemplate = "" (عدم لمس قالب المخرجات)
+     * - outputTemplate = DownloadUtil.OUTPUT_TEMPLATE_DEFAULT (تسمية الملف بعنوان المقطع النظيف)
      */
-    fun createAudioPreferences(): DownloadUtil.DownloadPreferences {
+    fun createAudioPreferences(
+        outputTemplate: String = DownloadUtil.OUTPUT_TEMPLATE_DEFAULT,
+    ): DownloadUtil.DownloadPreferences {
         return DownloadUtil.DownloadPreferences.EMPTY.copy(
             extractAudio = true,
             convertAudio = true,
             audioConvertFormat = CONVERT_MP3,
             formatIdString = "",
             aria2c = false,
-            outputTemplate = "",
+            outputTemplate = outputTemplate,
         )
     }
 
