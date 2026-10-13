@@ -33,12 +33,12 @@
   - **معاينة تلقائية:** شاهد عنوان الفيديو وصورته المصغرة قبل التحميل.
 - **Format Choice:** Easily choose between Video (MP4) or Audio (MP3).
   - **خيارات متعددة:** اختر بسهولة بين تحميل الفيديو (MP4) أو الصوت (MP3).
-- **Download History:** View and manage your past downloads.
-  - **سجل التحميلات:** عرض وإدارة تحميلاتك السابقة.
-- **Advanced Mode:** Access Seal's full download interface for power users.
-  - **الوضع المتقدم:** الوصول إلى واجهة Seal الكاملة للمستخدمين المحترفين.
-- **Auto Updates:** Checks for app and engine updates automatically.
-  - **تحديثات تلقائية:** يتحقق من وجود تحديثات للتطبيق والمحرك تلقائياً.
+- **Download History & Queue:** View past downloads and monitor active queue tasks.
+  - **سجل وقائمة التحميلات:** عرض وإدارة التحميلات السابقة ومتابعة قائمة الانتظار الحالية.
+- **Instant Language Switch:** Switch between Arabic and English instantly with one tap.
+  - **تبديل سريع للغة:** التبديل الفوري بين العربية والإنجليزية بنقرة واحدة.
+- **Auto Updates:** Checks for app and engine updates automatically with active download protection.
+  - **تحديثات تلقائية:** يتحقق من وجود تحديثات للتطبيق والمحرك تلقائياً مع حماية التنزيلات الجارية.
 
 ## 📱 Screenshots / لقطات الشاشة
 
