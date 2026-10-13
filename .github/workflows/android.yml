@@ -8,6 +8,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      # Exposed at job level because the `secrets` context is not available
+      # inside a step-level `if` condition (using it there makes the whole
+      # workflow file invalid and the run fails at startup).
+      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -20,8 +26,8 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+    - name: Show Android SDK location
+      run: echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT ANDROID_HOME=$ANDROID_HOME"
 
     - uses: gradle/actions/setup-gradle@v3
 
@@ -38,11 +44,11 @@ jobs:
       run: ./gradlew assembleRelease
 
     - name: Sign app APK
-      if: ${{ secrets.SIGNING_KEY != '' }}
+      if: env.SIGNING_KEY != ''
       id: sign_app
       uses: ilharp/sign-android-release@nightly
       with:
-        releaseDir: app/build/outputs/apk/release
+        releaseDir: app/build/outputs/apk/generic/release
         signingKey: ${{ secrets.SIGNING_KEY }}
         keyAlias: ${{ secrets.ALIAS }}
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
@@ -52,6 +58,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: apks
-        path: app/build/outputs/apk/release/*.apk
+        path: app/build/outputs/apk/generic/release/*.apk
         if-no-files-found: error
         retention-days: 20
