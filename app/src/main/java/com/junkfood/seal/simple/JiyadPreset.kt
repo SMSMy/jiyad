@@ -20,6 +20,7 @@ import com.junkfood.seal.util.PreferenceUtil.getString
 import com.junkfood.seal.util.PreferenceUtil.updateBoolean
 import com.junkfood.seal.util.PreferenceUtil.updateString
 import com.junkfood.seal.util.VIDEO_DIRECTORY
+import com.junkfood.seal.util.YT_DLP_AUTO_UPDATE
 import com.junkfood.seal.util.DatabaseUtil
 import com.junkfood.seal.util.UpdateUtil
 import com.yausername.youtubedl_android.YoutubeDL
@@ -104,6 +105,7 @@ object JiyadPreset {
         defaultAudioPath: String,
         onWriteVideo: (String) -> Unit,
         onWriteAudio: (String) -> Unit,
+        onWriteYtDlpAutoUpdate: (Boolean) -> Unit = {},
         onMarkApplied: () -> Unit,
     ): Pair<String, String> {
         if (!isApplied) {
@@ -113,6 +115,8 @@ object JiyadPreset {
             if (!hasAudioKey) {
                 onWriteAudio(defaultAudioPath)
             }
+            // تعطيل التحديث التلقائي غير المحمي في المنبع عند الضبط الأول لحماية المستخدم
+            onWriteYtDlpAutoUpdate(false)
             onMarkApplied()
         }
 
@@ -126,6 +130,7 @@ object JiyadPreset {
      * الضبط الأول ومزامنة الذاكرة الحية (D10):
      * - فحص مفتاح jiyad_preset_applied
      * - لكل من VIDEO_DIRECTORY و AUDIO_DIRECTORY: يكتب في MMKV فقط إذا كان المفتاح غائباً
+     * - كتابة YT_DLP_AUTO_UPDATE = false لمنع التحديث غير المحمي في المنبع
      * - إسناد المسارات مباشرة للمتغيرين العامين في الذاكرة الحية:
      *     App.videoDownloadDir = videoDir.absolutePath
      *     App.audioDownloadDir = audioDir.absolutePath
@@ -156,6 +161,7 @@ object JiyadPreset {
             defaultAudioPath = defaultAudioDir.absolutePath,
             onWriteVideo = { VIDEO_DIRECTORY.updateString(it) },
             onWriteAudio = { AUDIO_DIRECTORY.updateString(it) },
+            onWriteYtDlpAutoUpdate = { YT_DLP_AUTO_UPDATE.updateBoolean(it) },
             onMarkApplied = { KEY_JIYAD_PRESET_APPLIED.updateBoolean(true) }
         )
 
@@ -174,24 +180,63 @@ object JiyadPreset {
     }
 
     /**
-     * التحقق من وجود مهام تنزيل جارية في DownloaderV2
+     * التحقق مما إذا كانت حالة المهمة تعتبر مانعة لتحديث yt-dlp (D16):
+     * أي حالة ليست (Completed أو Canceled أو Error) تعتبر مانعة
+     * وتشمل: Idle, FetchingInfo, ReadyWithInfo, Running.
+     * السبب الهندسي: منع استبدال مكتبات بايثون أو محرك yt-dlp الثنائي أثناء تشغيل أو تجهيز
+     * أي تنزيل لتفادي انهيار العملية (Crash/SIGSEGV) أو إفساد الملفات الجاري تحميلها.
      */
-    fun isAnyTaskRunning(downloader: DownloaderV2): Boolean {
-        return downloader.getTaskStateMap().values.any {
-            it.downloadState is Task.DownloadState.Running
+    fun isBlockingDownloadState(state: Task.DownloadState): Boolean {
+        return when (state) {
+            is Task.DownloadState.Completed,
+            is Task.DownloadState.Canceled,
+            is Task.DownloadState.Error -> false
+            is Task.DownloadState.Idle,
+            is Task.DownloadState.FetchingInfo,
+            is Task.DownloadState.ReadyWithInfo,
+            is Task.DownloadState.Running -> true
         }
     }
 
     /**
-     * استضافة تحديث yt-dlp بحارس المهام (D16):
-     * إذا كان هناك أي تنزيل نشط، يتم تأجيل التحديث لحماية العملية الحالية.
+     * التحقق من وجود أي مهمة مانعة لتحديث yt-dlp في DownloaderV2 (D16):
+     * يشمل كل المهام التي ليست في حالة نهائية (Idle, FetchingInfo, ReadyWithInfo, Running).
      */
-    suspend fun safeUpdateYtDlp(downloader: DownloaderV2): YoutubeDL.UpdateStatus? {
-        if (isAnyTaskRunning(downloader)) {
-            Log.w(TAG, "yt-dlp update postponed: active download in progress in DownloaderV2")
+    fun isAnyTaskActive(downloader: DownloaderV2): Boolean {
+        return downloader.getTaskStateMap().values.any {
+            isBlockingDownloadState(it.downloadState)
+        }
+    }
+
+    /**
+     * متوافق مع الاستدعاءات القائمة مع تحويله للفحص الشامل
+     */
+    fun isAnyTaskRunning(downloader: DownloaderV2): Boolean = isAnyTaskActive(downloader)
+
+    /**
+     * استضافة تحديث yt-dlp بحارس المهام الموحد (D16):
+     * الفحص يتم مباشرة في اللحظة نفسها قبل استدعاء UpdateUtil.updateYtDlp().
+     * إذا كان هناك أي تنزيل نشط أو قيد التجهيز (Idle/FetchingInfo/ReadyWithInfo/Running)،
+     * يتم تأجيل التحديث فوراً وتسجيل تفاصيل المهام المانعة في اللوج.
+     */
+    suspend fun safeUpdateYtDlp(
+        downloader: DownloaderV2,
+        logPoster: (String) -> Unit = { Log.w(TAG, it) },
+        updater: suspend () -> YoutubeDL.UpdateStatus? = { UpdateUtil.updateYtDlp() }
+    ): YoutubeDL.UpdateStatus? {
+        val blockingTasks = downloader.getTaskStateMap().entries.filter {
+            isBlockingDownloadState(it.value.downloadState)
+        }
+
+        if (blockingTasks.isNotEmpty()) {
+            val details = blockingTasks.joinToString { (task, state) ->
+                "${task.url.take(60)} (State: ${state.downloadState::class.simpleName})"
+            }
+            val msg = "yt-dlp update postponed: active download/fetch tasks in progress: $details"
+            logPoster(msg)
             return null
         }
-        return UpdateUtil.updateYtDlp()
+        return updater()
     }
 
     /**

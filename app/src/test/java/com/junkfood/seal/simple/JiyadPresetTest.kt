@@ -5,9 +5,12 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.junkfood.seal.download.DownloaderV2
 import com.junkfood.seal.download.Task
 import com.junkfood.seal.util.CONVERT_MP3
+import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -41,6 +44,7 @@ class JiyadPresetTest {
     fun testResolvePresetDirectories_cleanInstall() {
         var writtenVideo: String? = null
         var writtenAudio: String? = null
+        var writtenYtDlpAutoUpdate: Boolean? = null
         var markedApplied = false
 
         val (finalVideo, finalAudio) = JiyadPreset.resolvePresetDirectories(
@@ -53,11 +57,13 @@ class JiyadPresetTest {
             defaultAudioPath = "/sdcard/Download/Jiyad/Audio",
             onWriteVideo = { writtenVideo = it },
             onWriteAudio = { writtenAudio = it },
+            onWriteYtDlpAutoUpdate = { writtenYtDlpAutoUpdate = it },
             onMarkApplied = { markedApplied = true },
         )
 
         assertEquals("/sdcard/Download/Jiyad", writtenVideo)
         assertEquals("/sdcard/Download/Jiyad/Audio", writtenAudio)
+        assertEquals(false, writtenYtDlpAutoUpdate)
         assertTrue(markedApplied)
         assertEquals("/sdcard/Download/Jiyad", finalVideo)
         assertEquals("/sdcard/Download/Jiyad/Audio", finalAudio)
@@ -128,48 +134,160 @@ class JiyadPresetTest {
     }
 
     @Test
-    fun testYtDlpGuard_postponesWhenTaskIsRunning() {
+    fun testYtDlpGuard_allFourActiveStates_postponeUpdate() {
+        val activeStates: List<Task.DownloadState> = listOf(
+            Task.DownloadState.Idle,
+            Task.DownloadState.FetchingInfo(job = Job(), taskId = "task-fetch"),
+            Task.DownloadState.ReadyWithInfo,
+            Task.DownloadState.Running(
+                job = Job(),
+                taskId = "task-run",
+                progress = 0.5f,
+                progressText = "50%"
+            )
+        )
+
+        for (state in activeStates) {
+            // التحقق من أن الحالة تعتبر مانعة بشكل منفرد (D16)
+            assertTrue(
+                "State ${state::class.simpleName} must be recognized as blocking",
+                JiyadPreset.isBlockingDownloadState(state)
+            )
+
+            // التحقق من أن DownloaderV2 يسجل وجود مهمة نشطة مانعة
+            val map = mutableStateMapOf<Task, Task.State>()
+            val downloader = TestDownloader(map)
+            val task = Task(
+                url = "https://example.com/test_${state::class.simpleName}",
+                preferences = JiyadPreset.createVideoPreferences()
+            )
+            map[task] = Task.State(downloadState = state, videoInfo = null, viewState = Task.ViewState())
+
+            assertTrue(
+                "isAnyTaskActive must be true for ${state::class.simpleName}",
+                JiyadPreset.isAnyTaskActive(downloader)
+            )
+            assertTrue(
+                "isAnyTaskRunning must be true for ${state::class.simpleName}",
+                JiyadPreset.isAnyTaskRunning(downloader)
+            )
+        }
+    }
+
+    @Test
+    fun testYtDlpGuard_terminalStates_allowUpdate() {
+        val terminalStates: List<Task.DownloadState> = listOf(
+            Task.DownloadState.Completed(filePath = "/path/to/downloaded.mp4"),
+            Task.DownloadState.Canceled(action = Task.RestartableAction.Download),
+            Task.DownloadState.Error(
+                throwable = RuntimeException("Network fail"),
+                action = Task.RestartableAction.Download
+            )
+        )
+
+        for (state in terminalStates) {
+            // التحقق من أن الحالة لا تعتبر مانعة (D16)
+            assertFalse(
+                "State ${state::class.simpleName} must NOT be blocking",
+                JiyadPreset.isBlockingDownloadState(state)
+            )
+
+            // التحقق من أن DownloaderV2 لا يمنع التحديث إذا كانت المهمة منتهية
+            val map = mutableStateMapOf<Task, Task.State>()
+            val downloader = TestDownloader(map)
+            val task = Task(
+                url = "https://example.com/test_${state::class.simpleName}",
+                preferences = JiyadPreset.createVideoPreferences()
+            )
+            map[task] = Task.State(downloadState = state, videoInfo = null, viewState = Task.ViewState())
+
+            assertFalse(
+                "isAnyTaskActive must be false for ${state::class.simpleName}",
+                JiyadPreset.isAnyTaskActive(downloader)
+            )
+            assertFalse(
+                "isAnyTaskRunning must be false for ${state::class.simpleName}",
+                JiyadPreset.isAnyTaskRunning(downloader)
+            )
+        }
+    }
+
+    @Test
+    fun testSafeUpdateYtDlp_downloadInProgress_postponesUpdateAndLogsReason() = runBlocking {
         val map = mutableStateMapOf<Task, Task.State>()
         val downloader = TestDownloader(map)
 
-        assertFalse(JiyadPreset.isAnyTaskRunning(downloader))
-
+        // محاكاة بدء تنزيل من الواجهة المبسطة
         val task = Task(
-            url = "https://example.com/video",
+            url = "https://example.com/active_video_download",
             preferences = JiyadPreset.createVideoPreferences()
         )
-        val runningState = Task.State(
+        map[task] = Task.State(
             downloadState = Task.DownloadState.Running(
                 job = Job(),
                 taskId = task.id,
-                progress = 0.5f,
-                progressText = "50%"
+                progress = 0.35f,
+                progressText = "35%"
             ),
             videoInfo = null,
             viewState = Task.ViewState()
         )
-        map[task] = runningState
 
-        assertTrue(JiyadPreset.isAnyTaskRunning(downloader))
+        var updaterCalled = false
+        var capturedLog: String? = null
+
+        // استدعاء فحص التحديث
+        val result = JiyadPreset.safeUpdateYtDlp(
+            downloader = downloader,
+            logPoster = { capturedLog = it },
+            updater = {
+                updaterCalled = true
+                YoutubeDL.UpdateStatus.DONE
+            }
+        )
+
+        // التحقق من عدم بدء التحديث (إرجاع null وعدم استدعاء الدالة المحدثة)
+        assertNull(result)
+        assertFalse(updaterCalled)
+
+        // التحقق من تسجيل سطر اللوج مع سبب التأجيل وتفاصيل المهمة المانعة
+        assertTrue(capturedLog != null)
+        assertTrue(capturedLog!!.contains("yt-dlp update postponed"))
+        assertTrue(capturedLog!!.contains("active_video_download"))
+        assertTrue(capturedLog!!.contains("Running"))
     }
 
     @Test
-    fun testYtDlpGuard_allowsWhenTaskCompletedOrIdle() {
+    fun testSafeUpdateYtDlp_terminalTasksOnly_allowsUpdate() = runBlocking {
         val map = mutableStateMapOf<Task, Task.State>()
         val downloader = TestDownloader(map)
 
+        // مهام مكتملة فقط
         val task = Task(
-            url = "https://example.com/video",
+            url = "https://example.com/finished_video",
             preferences = JiyadPreset.createVideoPreferences()
         )
-        val completedState = Task.State(
-            downloadState = Task.DownloadState.Completed(filePath = "/path/to/video.mp4"),
+        map[task] = Task.State(
+            downloadState = Task.DownloadState.Completed(filePath = "/storage/video.mp4"),
             videoInfo = null,
             viewState = Task.ViewState()
         )
-        map[task] = completedState
 
-        assertFalse(JiyadPreset.isAnyTaskRunning(downloader))
+        var updaterCalled = false
+        var capturedLog: String? = null
+
+        val result = JiyadPreset.safeUpdateYtDlp(
+            downloader = downloader,
+            logPoster = { capturedLog = it },
+            updater = {
+                updaterCalled = true
+                YoutubeDL.UpdateStatus.DONE
+            }
+        )
+
+        assertEquals(YoutubeDL.UpdateStatus.DONE, result)
+        assertTrue(updaterCalled)
+        assertNull(capturedLog)
     }
 
     @Test

@@ -28,3 +28,10 @@ Modifications to upstream code are strictly quarantined:
 - `UpdateUtil.kt`: Repository owner/repo pointing to `SMSMy/jiyad` (≤ 4 lines).
 - `app/build.gradle.kts`: Automated `versionCode = currentVersionCode` driven by `Version.kt`.
 - `strings.xml`: Exclusive `jiyad_*` keys with single named exception `app_name`.
+
+## 5. Architectural Decisions & Deviations
+
+### 5.1 yt-dlp Guard & Auto-Update Containment (D16)
+- **Issue:** Upstream's `YtdlpUpdater` (in `com.junkfood.seal.ui.page.YtdlpUpdater`) checked legacy V1 `Downloader.downloaderState` rather than active V2 tasks in `DownloaderV2`. If a background update triggers while tasks are in `Idle`, `FetchingInfo`, `ReadyWithInfo`, or `Running`, replacing Python packages or binaries crashes the active process.
+- **Zero-UI-Modification Solution:** Modifying files in `com.junkfood.seal.ui.**` is strictly forbidden by the Whitelist. To neutralize upstream's un-guarded auto-update without touching `ui/**`, Jiyad sets `YT_DLP_AUTO_UPDATE = false` in MMKV preferences during initial configuration (`initPresetAndSyncMemory`). This disables upstream's un-guarded update trigger cleanly.
+- **Guarded Update in Simple UI:** Updates in Jiyad's simplified UI (`simple/**`) are routed exclusively through `safeUpdateYtDlp(downloader: DownloaderV2)` which inspects `DownloaderV2.getTaskStateMap()` in real-time right before invoking `UpdateUtil.updateYtDlp()`. The guard postpones updating if ANY task is non-terminal (i.e. not `Completed`, `Canceled`, or `Error`), protecting tasks across all stages.
