@@ -32,16 +32,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import com.junkfood.seal.download.DownloaderV2
+import com.junkfood.seal.download.Task
+import com.junkfood.seal.util.DownloadUtil
+import com.yausername.youtubedl_android.YoutubeDL
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 /**
  * الشاشة الرئيسية المبسطة لتطبيق جياد
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SimpleHomeScreen(initialUrl: String = "") {
+fun SimpleHomeScreen(
+    initialUrl: String = "",
+    downloader: DownloaderV2 = koinInject()
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -50,6 +58,7 @@ fun SimpleHomeScreen(initialUrl: String = "") {
     fun s(key: String) = SimpleStrings.get(key, lang)
 
     var url by remember { mutableStateOf(initialUrl) }
+    var currentTask by remember { mutableStateOf<Task?>(null) }
     var isDownloading by remember { mutableStateOf(false) }
     var progress by remember { mutableFloatStateOf(0f) }
     var statusMessage by remember { mutableStateOf("") }
@@ -103,10 +112,10 @@ fun SimpleHomeScreen(initialUrl: String = "") {
             delay(800) // انتظار قبل الجلب لتجنب طلبات كثيرة
             isFetchingInfo = true
             try {
-                val info = JiyadDownloader.fetchVideoInfo(newUrl.trim())
-                info?.let {
-                    videoTitle = it.title
-                    videoThumbnail = it.thumbnail
+                val infoResult = DownloadUtil.fetchVideoInfoFromUrl(url = newUrl.trim())
+                infoResult.getOrNull()?.let { info ->
+                    videoTitle = info.title
+                    videoThumbnail = info.thumbnail ?: ""
                 }
             } catch (_: Exception) {}
             isFetchingInfo = false
@@ -121,12 +130,15 @@ fun SimpleHomeScreen(initialUrl: String = "") {
         }
     }
 
-    // التحقق من التحديثات + تحديث yt-dlp تلقائي
+    // التحقق من التحديثات + الضبط المسبق ومزامنة الذاكرة الحية + تحديث yt-dlp المحمي (D10, D16)
     LaunchedEffect(Unit) {
-        // تحديث yt-dlp تلقائياً أولاً
+        // الضبط المسبق ومزامنة الذاكرة الحية فوراً (D10)
+        JiyadPreset.initPresetAndSyncMemory()
+
+        // استضافة تحديث yt-dlp بحارس المهام (D16)
         if (SimpleConfig.AUTO_UPDATE_YTDLP) {
             try {
-                JiyadDownloader.updateYtDlp(context)
+                JiyadPreset.safeUpdateYtDlp(downloader)
             } catch (_: Exception) {}
         }
 
@@ -140,29 +152,63 @@ fun SimpleHomeScreen(initialUrl: String = "") {
         } catch (_: Exception) {}
     }
 
-    // ربط Callbacks مع الـ Service
-    DisposableEffect(Unit) {
-        SimpleDownloadService.onProgressUpdate = { p, text ->
-            progress = p
-            statusText = text
-        }
-        SimpleDownloadService.onDownloadComplete = { result ->
-            isDownloading = false
-            result.onSuccess {
-                statusMessage = "✅ ${s("download_success")}"
-                progress = 1f
-            }.onFailure { e ->
-                statusMessage = "❌ ${s("download_failed")} ${e.message?.take(100) ?: s("unknown_error")}"
-                progress = 0f
+    // مراقبة مهام DownloaderV2 وتحديث الواجهة مباشرة (المرحلة 1.3)
+    val taskStateMap = downloader.getTaskStateMap()
+    val activeTask = currentTask?.let { t ->
+        taskStateMap.keys.find { it.id == t.id || it == t }
+    } ?: taskStateMap.keys.findLast {
+        it.url == url.trim() && (it.preferences.formatIdString == SimpleConfig.VIDEO_FORMAT || it.preferences.extractAudio)
+    }
+
+    val activeState = activeTask?.let { taskStateMap[it] }
+
+    LaunchedEffect(activeState) {
+        if (activeState != null) {
+            when (val ds = activeState.downloadState) {
+                is Task.DownloadState.Running -> {
+                    isDownloading = true
+                    progress = if (ds.progress >= 0f) ds.progress else 0f
+                    statusText = ds.progressText
+                    statusMessage = s("downloading")
+                }
+                is Task.DownloadState.FetchingInfo -> {
+                    isDownloading = true
+                    progress = 0f
+                    statusText = "جاري جلب المعلومات..."
+                    statusMessage = s("downloading")
+                }
+                is Task.DownloadState.Completed -> {
+                    if (isDownloading) {
+                        isDownloading = false
+                        progress = 1f
+                        statusText = ""
+                        statusMessage = "✅ ${s("download_success")}"
+                    }
+                }
+                is Task.DownloadState.Error -> {
+                    if (isDownloading) {
+                        isDownloading = false
+                        progress = 0f
+                        statusText = ""
+                        val errMsg = ds.throwable.message?.take(100) ?: s("unknown_error")
+                        statusMessage = "❌ ${s("download_failed")} $errMsg"
+                    }
+                }
+                is Task.DownloadState.Canceled -> {
+                    if (isDownloading) {
+                        isDownloading = false
+                        progress = 0f
+                        statusText = ""
+                        statusMessage = "تم الإلغاء"
+                    }
+                }
+                is Task.DownloadState.Idle,
+                is Task.DownloadState.ReadyWithInfo -> {}
             }
-        }
-        onDispose {
-            SimpleDownloadService.onProgressUpdate = null
-            SimpleDownloadService.onDownloadComplete = null
         }
     }
 
-    // بدء التحميل عبر Foreground Service
+    // بدء التحميل عبر DownloaderV2 الموحد (المرحلة 1.3)
     fun startDownload(isAudio: Boolean) {
         val trimmedUrl = url.trim()
         if (trimmedUrl.isBlank()) {
@@ -172,13 +218,23 @@ fun SimpleHomeScreen(initialUrl: String = "") {
 
         requestNotificationPermission()
 
+        // مزامنة الذاكرة الحية فوراً قبل إدراج المهمة
+        JiyadPreset.initPresetAndSyncMemory()
+
+        val preferences = if (isAudio) {
+            JiyadPreset.createAudioPreferences()
+        } else {
+            JiyadPreset.createVideoPreferences()
+        }
+
+        val task = Task(url = trimmedUrl, preferences = preferences)
+        currentTask = task
         isDownloading = true
         progress = 0f
         statusMessage = s("downloading")
         statusText = ""
 
-        // بدء التحميل عبر Service
-        SimpleDownloadService.startDownload(context, trimmedUrl, isAudio)
+        downloader.enqueue(task)
     }
 
     // التنقل بين الشاشات
@@ -462,6 +518,7 @@ fun SimpleHomeScreen(initialUrl: String = "") {
     if (showYtDlpDialog) {
         YtDlpUpdateDialog(
             lang = lang,
+            downloader = downloader,
             onDismiss = { showYtDlpDialog = false }
         )
     }
@@ -482,10 +539,10 @@ fun SimpleHomeScreen(initialUrl: String = "") {
 @Composable
 private fun YtDlpUpdateDialog(
     lang: SimpleStrings.Language,
+    downloader: DownloaderV2,
     onDismiss: () -> Unit
 ) {
     fun s(key: String) = SimpleStrings.get(key, lang)
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isUpdating by remember { mutableStateOf(false) }
     var resultMessage by remember { mutableStateOf("") }
@@ -510,9 +567,17 @@ private fun YtDlpUpdateDialog(
                 TextButton(onClick = {
                     isUpdating = true
                     scope.launch {
-                        val updated = JiyadDownloader.updateYtDlp(context)
+                        if (JiyadPreset.isAnyTaskRunning(downloader)) {
+                            resultMessage = "لا يمكن تحديث المحرك أثناء وجود تنزيل نشط. يرجى الانتظار حتى اكتمال التنزيل."
+                        } else {
+                            val status = JiyadPreset.safeUpdateYtDlp(downloader)
+                            resultMessage = if (status == YoutubeDL.UpdateStatus.DONE) {
+                                s("ytdlp_updated")
+                            } else {
+                                s("ytdlp_already_latest")
+                            }
+                        }
                         isUpdating = false
-                        resultMessage = if (updated) s("ytdlp_updated") else s("ytdlp_already_latest")
                     }
                 }) {
                     Text(s("update_now"), fontSize = 16.sp)
