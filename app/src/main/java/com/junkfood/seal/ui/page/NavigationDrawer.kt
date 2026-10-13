@@ -179,9 +179,8 @@ fun NavigationDrawerSheetContent(
                 label = { Text(stringResource(R.string.download_queue)) },
                 icon = { Icon(Icons.Filled.Download, null) },
                 onClick = {
-                    scope
-                        .launch { onDismissRequest() }
-                        .invokeOnCompletion { onNavigateToRoute(Route.HOME) }
+                    onNavigateToRoute(Route.HOME)
+                    scope.launch { onDismissRequest() }
                 },
                 selected = currentRoute == Route.HOME,
             )
@@ -189,9 +188,8 @@ fun NavigationDrawerSheetContent(
                 label = { Text(stringResource(R.string.downloads_history)) },
                 icon = { Icon(Icons.Outlined.Subscriptions, null) },
                 onClick = {
-                    scope
-                        .launch { onDismissRequest() }
-                        .invokeOnCompletion { onNavigateToRoute(Route.DOWNLOADS) }
+                    onNavigateToRoute(Route.DOWNLOADS)
+                    scope.launch { onDismissRequest() }
                 },
                 selected = currentRoute == Route.DOWNLOADS,
             )
@@ -199,9 +197,8 @@ fun NavigationDrawerSheetContent(
                 label = { Text(stringResource(R.string.custom_command)) },
                 icon = { Icon(Icons.Outlined.Terminal, null) },
                 onClick = {
-                    scope
-                        .launch { onDismissRequest() }
-                        .invokeOnCompletion { onNavigateToRoute(Route.TASK_LIST) }
+                    onNavigateToRoute(Route.TASK_LIST)
+                    scope.launch { onDismissRequest() }
                 },
                 selected = currentRoute == Route.TASK_LIST,
             )
@@ -209,9 +206,8 @@ fun NavigationDrawerSheetContent(
                 label = { Text(stringResource(R.string.settings)) },
                 icon = { Icon(Icons.Outlined.Settings, null) },
                 onClick = {
-                    scope
-                        .launch { onDismissRequest() }
-                        .invokeOnCompletion { onNavigateToRoute(Route.SETTINGS) }
+                    onNavigateToRoute(Route.SETTINGS)
+                    scope.launch { onDismissRequest() }
                 },
                 selected = currentRoute == Route.SETTINGS_PAGE,
             )
@@ -220,9 +216,8 @@ fun NavigationDrawerSheetContent(
                 label = { Text(stringResource(R.string.sponsor)) },
                 icon = { Icon(Icons.Outlined.VolunteerActivism, null) },
                 onClick = {
-                    scope
-                        .launch { onDismissRequest() }
-                        .invokeOnCompletion { onNavigateToRoute(Route.DONATE) }
+                    onNavigateToRoute(Route.DONATE)
+                    scope.launch { onDismissRequest() }
                 },
                 selected = currentRoute == Route.DONATE,
             )
@@ -246,11 +241,8 @@ fun NavigationDrawerSheetContent(
                     label = { Text(stringResource(R.string.general_settings)) },
                     icon = { Icon(Icons.Rounded.SettingsApplications, null) },
                     onClick = {
-                        scope
-                            .launch { onDismissRequest() }
-                            .invokeOnCompletion {
-                                onNavigateToRoute(Route.GENERAL_DOWNLOAD_PREFERENCES)
-                            }
+                        onNavigateToRoute(Route.GENERAL_DOWNLOAD_PREFERENCES)
+                        scope.launch { onDismissRequest() }
                     },
                     selected = currentRoute == Route.GENERAL_DOWNLOAD_PREFERENCES,
                 )
@@ -259,9 +251,8 @@ fun NavigationDrawerSheetContent(
                     label = { Text(stringResource(R.string.download_directory)) },
                     icon = { Icon(Icons.Rounded.Folder, null) },
                     onClick = {
-                        scope
-                            .launch { onDismissRequest() }
-                            .invokeOnCompletion { onNavigateToRoute(Route.DOWNLOAD_DIRECTORY) }
+                        onNavigateToRoute(Route.DOWNLOAD_DIRECTORY)
+                        scope.launch { onDismissRequest() }
                     },
                     selected = currentRoute == Route.DOWNLOAD_DIRECTORY,
                 )
@@ -270,9 +261,8 @@ fun NavigationDrawerSheetContent(
                     label = { Text(stringResource(R.string.cookies)) },
                     icon = { Icon(Icons.Rounded.Cookie, null) },
                     onClick = {
-                        scope
-                            .launch { onDismissRequest() }
-                            .invokeOnCompletion { onNavigateToRoute(Route.COOKIE_PROFILE) }
+                        onNavigateToRoute(Route.COOKIE_PROFILE)
+                        scope.launch { onDismissRequest() }
                     },
                     selected = currentRoute == Route.COOKIE_PROFILE,
                 )
@@ -281,9 +271,8 @@ fun NavigationDrawerSheetContent(
                     label = { Text(stringResource(R.string.trouble_shooting)) },
                     icon = { Icon(Icons.Rounded.BugReport, null) },
                     onClick = {
-                        scope
-                            .launch { onDismissRequest() }
-                            .invokeOnCompletion { onNavigateToRoute(Route.TROUBLESHOOTING) }
+                        onNavigateToRoute(Route.TROUBLESHOOTING)
+                        scope.launch { onDismissRequest() }
                     },
                     selected = currentRoute == Route.TROUBLESHOOTING,
                 )
@@ -292,9 +281,8 @@ fun NavigationDrawerSheetContent(
                     label = { Text(stringResource(R.string.about)) },
                     icon = { Icon(Icons.Rounded.Info, null) },
                     onClick = {
-                        scope
-                            .launch { onDismissRequest() }
-                            .invokeOnCompletion { onNavigateToRoute(Route.ABOUT) }
+                        onNavigateToRoute(Route.ABOUT)
+                        scope.launch { onDismissRequest() }
                     },
                     selected = currentRoute == Route.ABOUT,
                 )

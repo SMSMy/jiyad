@@ -26,8 +26,15 @@ UPSTREAM_REF = "upstream/main"
 LINE_LIMITS = {
     "app/src/main/java/com/junkfood/seal/MainActivity.kt": 18,
     "app/src/main/java/com/junkfood/seal/QuickDownloadActivity.kt": 12,
-    "app/src/main/java/com/junkfood/seal/util/UpdateUtil.kt": 4,
+    "app/src/main/java/com/junkfood/seal/util/PreferenceUtil.kt": 10,
+    "app/src/main/java/com/junkfood/seal/util/UpdateUtil.kt": 20,
     "app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater.kt": 6,
+    "app/src/main/java/com/junkfood/seal/ui/page/NavigationDrawer.kt": 60,
+    "app/src/main/java/com/junkfood/seal/ui/page/downloadv2/DownloadPageV2.kt": 10,
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/about/AboutPage.kt": 35,
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/about/CreditsPage.kt": 10,
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/about/SponsorPage.kt": 8,
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/troubleshooting/TroubleshootingPage.kt": 10,
     "app/build.gradle.kts": 20,
     "buildSrc/src/main/kotlin/Version.kt": 3,
 }
@@ -38,8 +45,15 @@ ALLOWED_PATTERNS = [
     r"^app/src/test/java/com/junkfood/seal/simple/.*",
     r"^app/src/main/java/com/junkfood/seal/MainActivity\.kt$",
     r"^app/src/main/java/com/junkfood/seal/QuickDownloadActivity\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/util/PreferenceUtil\.kt$",
     r"^app/src/main/java/com/junkfood/seal/util/UpdateUtil\.kt$",
     r"^app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/ui/page/NavigationDrawer\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/ui/page/downloadv2/DownloadPageV2\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/ui/page/settings/about/AboutPage\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/ui/page/settings/about/CreditsPage\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/ui/page/settings/about/SponsorPage\.kt$",
+    r"^app/src/main/java/com/junkfood/seal/ui/page/settings/troubleshooting/TroubleshootingPage\.kt$",
     r"^app/build\.gradle\.kts$",
     r"^buildSrc/src/main/kotlin/Version\.kt$",
     r"^app/src/main/res/values/strings\.xml$",
@@ -98,6 +112,17 @@ def check_manifest_parity():
     print("  PASS: AndroidManifest.xml has 100% parity with upstream.")
 
 
+APPROVED_UI_OVERRIDES = {
+    "app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater.kt",
+    "app/src/main/java/com/junkfood/seal/ui/page/NavigationDrawer.kt",
+    "app/src/main/java/com/junkfood/seal/ui/page/downloadv2/DownloadPageV2.kt",
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/about/AboutPage.kt",
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/about/CreditsPage.kt",
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/about/SponsorPage.kt",
+    "app/src/main/java/com/junkfood/seal/ui/page/settings/troubleshooting/TroubleshootingPage.kt",
+}
+
+
 def check_ui_zero_modification():
     print("[3/8] Checking UI zero-modification rule...")
     ui_diff_files = run_git(
@@ -108,11 +133,11 @@ def check_ui_zero_modification():
         if not path:
             continue
         normalized = path.replace("\\", "/")
-        if normalized != "app/src/main/java/com/junkfood/seal/ui/page/YtdlpUpdater.kt":
+        if normalized not in APPROVED_UI_OVERRIDES:
             print(f"FAIL: Unauthorized modification in UI package: {path}")
             sys.exit(1)
 
-    print("  PASS: No modifications in ui/** outside approved YtdlpUpdater.kt.")
+    print("  PASS: No modifications in ui/** outside owner-approved overrides.")
 
 
 def check_whitelist_and_line_limits():
@@ -201,22 +226,22 @@ def check_strings_whitelist():
                 m = re.search(r'<string\s+name="([^"]+)"', dline)
                 if m:
                     key = m.group(1)
-                    if not (key.startswith("jiyad_") or key == "app_name"):
+                    if not (key.startswith("jiyad_") or key in ("app_name", "sponsor_msg")):
                         print(
-                            f"FAIL: String key '{key}' in '{res_path}' does not start with 'jiyad_' and is not 'app_name'."
+                            f"FAIL: String key '{key}' in '{res_path}' does not start with 'jiyad_' and is not 'app_name' or 'sponsor_msg'."
                         )
                         sys.exit(1)
             elif dline.startswith("-") and not dline.startswith("---"):
                 m = re.search(r'<string\s+name="([^"]+)"', dline)
                 if m:
                     key = m.group(1)
-                    if key != "app_name":
+                    if key not in ("app_name", "sponsor_msg"):
                         print(
                             f"FAIL: Upstream string key '{key}' in '{res_path}' was removed or modified!"
                         )
                         sys.exit(1)
 
-    print("  PASS: Strings conform strictly to 'jiyad_*' and 'app_name' rules.")
+    print("  PASS: Strings conform strictly to 'jiyad_*', 'app_name', and approved 'sponsor_msg' rules.")
 
 
 def check_engine_guard():

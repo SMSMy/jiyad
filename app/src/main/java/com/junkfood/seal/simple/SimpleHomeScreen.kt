@@ -51,7 +51,7 @@ import org.koin.compose.koinInject
 fun SimpleHomeScreen(
     initialUrl: String = "",
     downloader: DownloaderV2 = koinInject(),
-    onSwitchToAdvanced: () -> Unit = {},
+    onOpenQueue: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -72,7 +72,6 @@ fun SimpleHomeScreen(
 
     // حالة القوائم
     var showMoreMenu by remember { mutableStateOf(false) }
-    var showYtDlpDialog by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
 
     // معلومات الفيديو
@@ -292,24 +291,6 @@ fun SimpleHomeScreen(
                                     showMoreMenu = false
                                 }
                             )
-                            // تحديث المحرك
-                            DropdownMenuItem(
-                                text = { Text(s("update_engine"), fontSize = 16.sp) },
-                                modifier = Modifier.sizeIn(minHeight = 48.dp),
-                                onClick = {
-                                    showMoreMenu = false
-                                    showYtDlpDialog = true
-                                }
-                            )
-                            // الوضع المتقدم - يفتح واجهة Seal الأصلية عبر المبدّل (المرحلة 3.3)
-                            DropdownMenuItem(
-                                text = { Text(s("advanced_mode"), fontSize = 16.sp) },
-                                modifier = Modifier.sizeIn(minHeight = 48.dp),
-                                onClick = {
-                                    showMoreMenu = false
-                                    onSwitchToAdvanced()
-                                }
-                            )
                         }
                     }
                 }
@@ -460,6 +441,21 @@ fun SimpleHomeScreen(
                 Text(s("download_audio"), fontSize = 20.sp, textAlign = TextAlign.Center)
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = onOpenQueue,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 56.dp)
+                    .heightIn(min = 56.dp)
+                    .semantics { contentDescription = s("download_queue") },
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Text(s("download_queue"), fontSize = 20.sp, textAlign = TextAlign.Center)
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
 
             // شريط التقدم
@@ -541,14 +537,6 @@ fun SimpleHomeScreen(
         }
     }
 
-    // نافذة تحديث yt-dlp
-    if (showYtDlpDialog) {
-        YtDlpUpdateDialog(
-            lang = lang,
-            downloader = downloader,
-            onDismiss = { showYtDlpDialog = false }
-        )
-    }
 
     // نافذة تحديث التطبيق (تحميل + تثبيت داخل التطبيق)
     if (showUpdateDialog && updateInfo != null) {
@@ -560,70 +548,6 @@ fun SimpleHomeScreen(
     }
 }
 
-/**
- * نافذة تحديث yt-dlp
- */
-@Composable
-private fun YtDlpUpdateDialog(
-    lang: SimpleStrings.Language,
-    downloader: DownloaderV2,
-    onDismiss: () -> Unit
-) {
-    fun s(key: String) = SimpleStrings.get(key, lang)
-    val scope = rememberCoroutineScope()
-    var isUpdating by remember { mutableStateOf(false) }
-    var resultMessage by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = { if (!isUpdating) onDismiss() },
-        title = { Text(s("ytdlp_update"), fontSize = 20.sp) },
-        text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (isUpdating) {
-                    CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-                    Text(s("ytdlp_updating"), fontSize = 16.sp)
-                } else if (resultMessage.isNotBlank()) {
-                    Text(resultMessage, fontSize = 16.sp)
-                } else {
-                    Text(s("ytdlp_update"), fontSize = 16.sp)
-                }
-            }
-        },
-        confirmButton = {
-            if (!isUpdating && resultMessage.isBlank()) {
-                TextButton(
-                    onClick = {
-                        isUpdating = true
-                        scope.launch {
-                            if (JiyadPreset.isAnyTaskRunning(downloader)) {
-                                resultMessage = s("ytdlp_update_postponed")
-                            } else {
-                                val status = JiyadPreset.safeUpdateYtDlp(downloader)
-                                resultMessage = if (status == YoutubeDL.UpdateStatus.DONE) {
-                                    s("ytdlp_updated")
-                                } else {
-                                    s("ytdlp_already_latest")
-                                }
-                            }
-                            isUpdating = false
-                        }
-                    },
-                    modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-                ) {
-                    Text(s("update_now"), fontSize = 16.sp)
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-            ) {
-                Text(s("close"), fontSize = 16.sp)
-            }
-        }
-    )
-}
 
 /**
  * نافذة تحديث التطبيق داخل التطبيق (تحميل + تثبيت)

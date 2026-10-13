@@ -71,6 +71,8 @@ object SimpleStrings {
         "retry" to R.string.jiyad_retry,
         "update_install_guide" to R.string.jiyad_update_install_guide,
         "switch_to_simple" to R.string.jiyad_switch_to_simple,
+        "download_queue" to R.string.jiyad_download_queue,
+        "issue_tracker" to R.string.jiyad_issue_tracker,
         "download_canceled" to R.string.jiyad_download_canceled,
         "fetching_info" to R.string.jiyad_fetching_info
     )

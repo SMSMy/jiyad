@@ -351,7 +351,6 @@ fun DownloadPageImplV2(
     Scaffold(
         modifier = modifier.fillMaxSize().statusBarsPadding(),
         containerColor = MaterialTheme.colorScheme.surface,
-        floatingActionButton = { FABs(modifier = Modifier, downloadCallback = downloadCallback) },
     ) { windowInsetsPadding ->
         val lazyListState = rememberLazyGridState()
         val windowWidthSizeClass = LocalWindowWidthState.current

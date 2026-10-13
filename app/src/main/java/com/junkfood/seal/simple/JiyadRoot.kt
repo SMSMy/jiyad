@@ -53,7 +53,7 @@ fun JiyadRoot(
     } else {
         SimpleHomeScreen(
             initialUrl = sharedUrl,
-            onSwitchToAdvanced = {
+            onOpenQueue = {
                 JiyadPreset.setUiMode(JiyadPreset.UI_MODE_ADVANCED)
                 uiMode = JiyadPreset.UI_MODE_ADVANCED
             }

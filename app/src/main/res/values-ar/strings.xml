@@ -279,7 +279,7 @@
     <string name="temporary_directory_desc">تخزين الملفات المؤقتة في الدليل الداخلي</string>
     <string name="sponsor">الراعي</string>
     <string name="sponsor_desc">ادعم هذا التطبيق من خلال الرعاية على GitHub</string>
-    <string name="sponsor_msg">Seal سيبقى دائمًا مجانيًا ومفتوح المصدر للجميع. إذا أعجبك، يُرجى التفكير في دعمي كراعياً على GitHub!</string>
+    <string name="sponsor_msg">جياد سيبقى دائماً مجانياً ومفتوح المصدر للجميع. إذا أعجبك، يُرجى دعم المشروع عبر GitHub!</string>
     <string name="feedback">التعليقات</string>
     <string name="sponsors">الرعاة</string>
     <string name="audio_format">صيغة الصوت</string>
@@ -498,7 +498,9 @@
     <string name="jiyad_install_update">تثبيت</string>
     <string name="jiyad_retry">إعادة المحاولة</string>
     <string name="jiyad_update_install_guide">لتثبيت التحديث، يرجى الضغط على زر التثبيت ثم تفعيل خيار «السماح بتثبيت التطبيقات من هذا المصدر» في شاشة الإعدادات.</string>
-    <string name="jiyad_switch_to_simple">العودة للواجهة المبسطة</string>
+    <string name="jiyad_switch_to_simple">العودة لواجهة التحميل</string>
+    <string name="jiyad_download_queue">قائمة التحميلات</string>
+    <string name="jiyad_issue_tracker">متتبع مشاكل جياد على GitHub</string>
     <string name="jiyad_download_canceled">تم إلغاء التحميل</string>
     <string name="jiyad_fetching_info">جاري جلب معلومات الفيديو…</string>
 </resources>
