@@ -19,3 +19,5 @@ local.properties
 .kotlin
 *.jks
 PROJECT_REPORT.md
+jiyad-plan-*.md
+app/.idea
