@@ -171,4 +171,13 @@ class JiyadPresetTest {
 
         assertFalse(JiyadPreset.isAnyTaskRunning(downloader))
     }
+
+    @Test
+    fun testIsEligibleUrl() {
+        assertTrue(JiyadPreset.isEligibleUrl("https://youtu.be/dQw4w9WgXcQ"))
+        assertFalse(JiyadPreset.isEligibleUrl(""))
+        assertFalse(JiyadPreset.isEligibleUrl("   "))
+        assertFalse(JiyadPreset.isEligibleUrl("https://example.com\nhttps://other.com"))
+        assertFalse(JiyadPreset.isEligibleUrl("https://example.com with some text"))
+    }
 }

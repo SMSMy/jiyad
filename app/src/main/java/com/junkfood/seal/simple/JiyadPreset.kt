@@ -1,7 +1,13 @@
 package com.junkfood.seal.simple
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.junkfood.seal.App
 import com.junkfood.seal.download.DownloaderV2
 import com.junkfood.seal.download.Task
@@ -16,6 +22,7 @@ import com.junkfood.seal.util.PreferenceUtil.updateString
 import com.junkfood.seal.util.VIDEO_DIRECTORY
 import com.junkfood.seal.util.UpdateUtil
 import com.yausername.youtubedl_android.YoutubeDL
+import org.koin.core.context.GlobalContext
 import java.io.File
 
 /**
@@ -24,6 +31,24 @@ import java.io.File
 object JiyadPreset {
     private const val TAG = "JiyadPreset"
     const val KEY_JIYAD_PRESET_APPLIED = "jiyad_preset_applied"
+    const val KEY_JIYAD_UI_MODE = "jiyad_ui_mode"
+    const val UI_MODE_SIMPLE = "simple"
+    const val UI_MODE_ADVANCED = "advanced"
+
+    /**
+     * قراءة وضع الواجهة الحالي (الافتراضي simple إن كان غائباً) (المرحلة 3.1)
+     */
+    fun getUiMode(): String {
+        val mode = KEY_JIYAD_UI_MODE.getString(UI_MODE_SIMPLE)
+        return if (mode.isBlank()) UI_MODE_SIMPLE else mode
+    }
+
+    /**
+     * كتابة وضع الواجهة عبر واجهة PreferenceUtil بلا لمس PreferenceUtil.kt (المرحلة 3.1)
+     */
+    fun setUiMode(mode: String) {
+        KEY_JIYAD_UI_MODE.updateString(mode)
+    }
 
     /**
      * ترجمة خيارات الفيديو إلى DownloadPreferences (المرحلة 1.1):
@@ -163,5 +188,55 @@ object JiyadPreset {
             return null
         }
         return UpdateUtil.updateYtDlp()
+    }
+
+    /**
+     * فحص صحة الرابط للتنزيل السريع (رابط فردي صالح غير متعدد الأسطر) (المرحلة 3.4)
+     */
+    fun isEligibleUrl(url: String): Boolean {
+        val trimmed = url.trim()
+        return trimmed.isNotBlank() && !trimmed.contains('\n') && !trimmed.contains(' ')
+    }
+
+    /**
+     * التحقق مما إذا كانت المشاركة مؤهلة للتنزيل الفوري في الوضع المبسط (D11 / المرحلة 3.4):
+     * - الوضع مبسط
+     * - الرابط صالح وفردي وغير متعدد الأسطر
+     * - إذن الإشعارات ممنوح (على Android 13+)
+     */
+    fun isEligibleForQuickDownload(context: Context, url: String): Boolean {
+        if (getUiMode() != UI_MODE_SIMPLE) return false
+        if (!isEligibleUrl(url)) return false
+        if (Build.VERSION.SDK_INT >= 33) {
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!hasPermission) return false
+        }
+        return true
+    }
+
+    /**
+     * معالجة التنزيل السريع إذا توفرت الشروط (D11 / المرحلة 3.4):
+     * إذا كان مؤهلاً: ينفذ التنزيل ويرجع true لإنهاء النشاط.
+     * إذا لم يكن مؤهلاً: يرجع false ليسقط التطبيق تلقائياً لورقة Seal (ShowSheet) دون إنهاء صامت.
+     */
+    fun handleQuickDownloadIfEligible(context: Context, url: String): Boolean {
+        if (!isEligibleForQuickDownload(context, url)) {
+            return false
+        }
+
+        return try {
+            App.startService()
+            initPresetAndSyncMemory()
+            val downloader: DownloaderV2 = GlobalContext.get().get()
+            downloader.enqueue(Task(url = url.trim(), preferences = createVideoPreferences()))
+            Toast.makeText(context, "⏳ جاري التحميل...", Toast.LENGTH_SHORT).show()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start quick download in simple mode", e)
+            false
+        }
     }
 }

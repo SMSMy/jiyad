@@ -69,6 +69,13 @@ class QuickDownloadActivity : ComponentActivity() {
 
         if (sharedUrlCached.isEmpty()) {
             finish()
+            return
+        }
+
+        // JIYAD:
+        if (com.junkfood.seal.simple.JiyadPreset.handleQuickDownloadIfEligible(this, sharedUrlCached)) {
+            finish()
+            return
         }
 
         App.startService()

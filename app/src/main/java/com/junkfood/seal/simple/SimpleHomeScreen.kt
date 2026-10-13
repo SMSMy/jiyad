@@ -48,7 +48,8 @@ import org.koin.compose.koinInject
 @Composable
 fun SimpleHomeScreen(
     initialUrl: String = "",
-    downloader: DownloaderV2 = koinInject()
+    downloader: DownloaderV2 = koinInject(),
+    onSwitchToAdvanced: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -285,23 +286,12 @@ fun SimpleHomeScreen(
                                     showYtDlpDialog = true
                                 }
                             )
-                            // الوضع المتقدم - يفتح واجهة Seal الأصلية
+                            // الوضع المتقدم - يفتح واجهة Seal الأصلية عبر المبدّل (المرحلة 3.3)
                             DropdownMenuItem(
                                 text = { Text(s("advanced_mode"), fontSize = 16.sp) },
                                 onClick = {
                                     showMoreMenu = false
-                                    val trimmedUrl = url.trim()
-                                    if (trimmedUrl.isNotBlank()) {
-                                        val advancedIntent = Intent(context, com.junkfood.seal.QuickDownloadActivity::class.java).apply {
-                                            action = Intent.ACTION_SEND
-                                            putExtra(Intent.EXTRA_TEXT, trimmedUrl)
-                                            type = "text/plain"
-                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        }
-                                        try {
-                                            context.startActivity(advancedIntent)
-                                        } catch (_: Exception) {}
-                                    }
+                                    onSwitchToAdvanced()
                                 }
                             )
                         }
@@ -652,6 +642,15 @@ private fun InAppUpdateDialog(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 5,
                             overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    if (downloadedApk != null && !SimpleAppUpdater.canInstallApks(context)) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "⚠️ لتثبيت التحديث، يرجى الضغط على زر التثبيت ثم تفعيل خيار «السماح بتثبيت التطبيقات من هذا المصدر» في شاشة الإعدادات.",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
