@@ -18,9 +18,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.junkfood.seal.util.PreferenceUtil
+import com.junkfood.seal.util.setLanguage
+import java.util.Locale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,7 +74,6 @@ fun SimpleHomeScreen(
     var currentScreen by remember { mutableStateOf("home") }
 
     // حالة القوائم
-    var showMoreMenu by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
 
     // معلومات الفيديو
@@ -269,29 +271,24 @@ fun SimpleHomeScreen(
                     ) {
                         Icon(Icons.Default.History, contentDescription = s("download_history"))
                     }
-                    // القائمة المنسدلة
-                    Box {
-                        IconButton(
-                            onClick = { showMoreMenu = true },
-                            modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-                        ) {
-                            Icon(Icons.Default.MoreVert, contentDescription = s("more_options"))
-                        }
-                        DropdownMenu(
-                            expanded = showMoreMenu,
-                            onDismissRequest = { showMoreMenu = false }
-                        ) {
-                            // تبديل اللغة
-                            DropdownMenuItem(
-                                text = { Text(SimpleStrings.toggle(lang).label, fontSize = 16.sp) },
-                                modifier = Modifier.sizeIn(minHeight = 48.dp),
-                                onClick = {
-                                    lang = SimpleStrings.toggle(lang)
-                                    SimpleStrings.saveLanguage(context, lang)
-                                    showMoreMenu = false
-                                }
-                            )
-                        }
+                    // تبديل اللغة (كرة أرضية بديهية للتنقل الفوري بين العربية والإنجليزية)
+                    IconButton(
+                        onClick = {
+                            val newLang = SimpleStrings.toggle(lang)
+                            lang = newLang
+                            SimpleStrings.saveLanguage(context, newLang)
+                            val targetLocale =
+                                if (newLang == SimpleStrings.Language.ARABIC) Locale("ar")
+                                else Locale("en", "US")
+                            PreferenceUtil.saveLocalePreference(targetLocale)
+                            setLanguage(targetLocale)
+                        },
+                        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Language,
+                            contentDescription = if (lang == SimpleStrings.Language.ARABIC) "English" else "العربية",
+                        )
                     }
                 }
             )

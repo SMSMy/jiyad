@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import androidx.annotation.StringRes
 import com.junkfood.seal.App.Companion.context
 import com.junkfood.seal.R
+import androidx.appcompat.app.AppCompatDelegate
 import java.util.Locale
 
 /**
@@ -78,7 +79,8 @@ object SimpleStrings {
     )
 
     fun getDefaultLanguage(): Language {
-        val deviceLang = Locale.getDefault().language
+        val appLocale = AppCompatDelegate.getApplicationLocales().get(0)
+        val deviceLang = appLocale?.language ?: Locale.getDefault().language
         return if (deviceLang == "ar") Language.ARABIC else Language.ENGLISH
     }
 
@@ -87,6 +89,10 @@ object SimpleStrings {
     }
 
     fun getSavedLanguage(context: Context): Language {
+        val appLocale = AppCompatDelegate.getApplicationLocales().get(0)
+        if (appLocale != null) {
+            return if (appLocale.language == "ar") Language.ARABIC else Language.ENGLISH
+        }
         val saved = getPrefs(context).getString(KEY_LANGUAGE, null)
         return when (saved) {
             "ar" -> Language.ARABIC
