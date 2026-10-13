@@ -20,7 +20,6 @@ import com.junkfood.seal.util.PreferenceUtil.getString
 import com.junkfood.seal.util.PreferenceUtil.updateBoolean
 import com.junkfood.seal.util.PreferenceUtil.updateString
 import com.junkfood.seal.util.VIDEO_DIRECTORY
-import com.junkfood.seal.util.YT_DLP_AUTO_UPDATE
 import com.junkfood.seal.util.DatabaseUtil
 import com.junkfood.seal.util.UpdateUtil
 import com.yausername.youtubedl_android.YoutubeDL
@@ -105,7 +104,6 @@ object JiyadPreset {
         defaultAudioPath: String,
         onWriteVideo: (String) -> Unit,
         onWriteAudio: (String) -> Unit,
-        onWriteYtDlpAutoUpdate: (Boolean) -> Unit = {},
         onMarkApplied: () -> Unit,
     ): Pair<String, String> {
         if (!isApplied) {
@@ -115,8 +113,6 @@ object JiyadPreset {
             if (!hasAudioKey) {
                 onWriteAudio(defaultAudioPath)
             }
-            // تعطيل التحديث التلقائي غير المحمي في المنبع عند الضبط الأول لحماية المستخدم
-            onWriteYtDlpAutoUpdate(false)
             onMarkApplied()
         }
 
@@ -130,7 +126,6 @@ object JiyadPreset {
      * الضبط الأول ومزامنة الذاكرة الحية (D10):
      * - فحص مفتاح jiyad_preset_applied
      * - لكل من VIDEO_DIRECTORY و AUDIO_DIRECTORY: يكتب في MMKV فقط إذا كان المفتاح غائباً
-     * - كتابة YT_DLP_AUTO_UPDATE = false لمنع التحديث غير المحمي في المنبع
      * - إسناد المسارات مباشرة للمتغيرين العامين في الذاكرة الحية:
      *     App.videoDownloadDir = videoDir.absolutePath
      *     App.audioDownloadDir = audioDir.absolutePath
@@ -161,7 +156,6 @@ object JiyadPreset {
             defaultAudioPath = defaultAudioDir.absolutePath,
             onWriteVideo = { VIDEO_DIRECTORY.updateString(it) },
             onWriteAudio = { AUDIO_DIRECTORY.updateString(it) },
-            onWriteYtDlpAutoUpdate = { YT_DLP_AUTO_UPDATE.updateBoolean(it) },
             onMarkApplied = { KEY_JIYAD_PRESET_APPLIED.updateBoolean(true) }
         )
 

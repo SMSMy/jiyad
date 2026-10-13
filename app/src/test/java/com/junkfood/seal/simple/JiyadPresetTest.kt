@@ -44,7 +44,6 @@ class JiyadPresetTest {
     fun testResolvePresetDirectories_cleanInstall() {
         var writtenVideo: String? = null
         var writtenAudio: String? = null
-        var writtenYtDlpAutoUpdate: Boolean? = null
         var markedApplied = false
 
         val (finalVideo, finalAudio) = JiyadPreset.resolvePresetDirectories(
@@ -57,13 +56,11 @@ class JiyadPresetTest {
             defaultAudioPath = "/sdcard/Download/Jiyad/Audio",
             onWriteVideo = { writtenVideo = it },
             onWriteAudio = { writtenAudio = it },
-            onWriteYtDlpAutoUpdate = { writtenYtDlpAutoUpdate = it },
             onMarkApplied = { markedApplied = true },
         )
 
         assertEquals("/sdcard/Download/Jiyad", writtenVideo)
         assertEquals("/sdcard/Download/Jiyad/Audio", writtenAudio)
-        assertEquals(false, writtenYtDlpAutoUpdate)
         assertTrue(markedApplied)
         assertEquals("/sdcard/Download/Jiyad", finalVideo)
         assertEquals("/sdcard/Download/Jiyad/Audio", finalAudio)

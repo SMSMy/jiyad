@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 fun YtdlpUpdater() {
 
     val downloaderState by Downloader.downloaderState.collectAsStateWithLifecycle()
+    val downloader: com.junkfood.seal.download.DownloaderV2 = org.koin.compose.koinInject()
 
     LaunchedEffect(Unit) {
         if (downloaderState !is Downloader.State.Idle) return@LaunchedEffect
@@ -36,6 +37,11 @@ fun YtdlpUpdater() {
         val currentTime = System.currentTimeMillis()
 
         if (currentTime < lastUpdateTime + YT_DLP_UPDATE_INTERVAL.getLong()) {
+            return@LaunchedEffect
+        }
+
+        if (com.junkfood.seal.simple.JiyadPreset.isAnyTaskActive(downloader)) {
+            android.util.Log.w("YtdlpUpdater", "yt-dlp update postponed: active download/fetch tasks in progress")
             return@LaunchedEffect
         }
 
