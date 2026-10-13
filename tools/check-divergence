@@ -65,6 +65,7 @@ ALLOWED_PATTERNS = [
     r"^notification_icon\.png$",
     r"^UPSTREAM\.md$",
     r"^README\.md$",
+    r"^RELEASE_NOTES\.md$",
     r"^\.gitignore$",
     r"^tools/.*",
     r"^\.github/.*",

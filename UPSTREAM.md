@@ -36,6 +36,7 @@ Modifications to upstream code are strictly quarantined:
 - `app/src/main/java/com/junkfood/seal/ui/page/settings/troubleshooting/TroubleshootingPage.kt`: Issue tracker pointing to `SMSMy/jiyad/issues` (≤ 10 lines).
 - `app/build.gradle.kts`: Automated `versionCode = currentVersionCode` driven by `Version.kt`.
 - `strings.xml`: Exclusive `jiyad_*` keys with named exceptions `app_name` and `sponsor_msg`.
+- `RELEASE_NOTES.md`: Jiyad-only release notes document (Arabic/English), published alongside each release; it has no upstream counterpart.
 
 ## 5. Architectural Decisions & Deviations
 
